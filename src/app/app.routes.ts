@@ -30,9 +30,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent),
       },
       {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full',
+        path: 'terms',
+        loadComponent: () => import('./pages/terms/terms.component').then(m => m.TermsComponent),
+      },
+      {
+        path: 'privacy',
+        loadComponent: () => import('./pages/privacy/privacy.component').then(m => m.PrivacyComponent),
+      },
+      {
+        path: 'contact',
+        loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent),
       }
     ]
   },
