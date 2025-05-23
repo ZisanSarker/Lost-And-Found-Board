@@ -15,44 +15,75 @@ export const routes: Routes = [
       },
       {
         path: 'home',
-        loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
+        loadComponent: () =>
+          import('./features/home/home.component').then((m) => m.HomeComponent),
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent
+          ),
       },
       {
         path: 'messages',
-        loadComponent: () => import('./features/messages/messages.component').then(m => m.MessagesComponent),
+        loadComponent: () =>
+          import('./features/messages/messages.component').then(
+            (m) => m.MessagesComponent
+          ),
       },
       {
         path: 'profile',
-        loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent),
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(
+            (m) => m.ProfileComponent
+          ),
       },
       {
         path: 'terms',
-        loadComponent: () => import('./pages/terms/terms.component').then(m => m.TermsComponent),
+        loadComponent: () =>
+          import('./pages/terms/terms.component').then((m) => m.TermsComponent),
       },
       {
         path: 'privacy',
-        loadComponent: () => import('./pages/privacy/privacy.component').then(m => m.PrivacyComponent),
+        loadComponent: () =>
+          import('./pages/privacy/privacy.component').then(
+            (m) => m.PrivacyComponent
+          ),
       },
       {
         path: 'contact',
-        loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent),
-      }
-    ]
+        loadComponent: () =>
+          import('./pages/contact/contact.component').then(
+            (m) => m.ContactComponent
+          ),
+      },
+      {
+        path: 'report/lost',
+        loadComponent: () =>
+          import('./features/report/lost/lost.component').then(
+            (m) => m.LostComponent
+          ),
+      },
+      {
+        path: 'report/found',
+        loadComponent: () =>
+          import('./features/report/found/found.component').then(
+            (m) => m.FoundComponent
+          ),
+      },
+    ],
   },
 
   // routes WITHOUT layout (auth)
   {
     path: 'auth',
-    children: authRoutes
+    children: authRoutes,
   },
 
   // catch all
   {
     path: '**',
     redirectTo: '',
-  }
+  },
 ];
