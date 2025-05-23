@@ -1,15 +1,18 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
+import { LayoutComponent } from './layout/layout.component';
 import { authRoutes } from './features/auth/auth.routes';
 
 export const routes: Routes = [
   {
-    path: 'auth',
-    children: authRoutes,
+    path: '',
+    component: LayoutComponent,
+    children: [
+      { path: 'auth', children: authRoutes },
+      // other routes
+    ],
   },
   {
-    path: '',
-    redirectTo: 'auth/sign-in',
-    pathMatch: 'full',
+    path: '**',
+    redirectTo: '',
   },
 ];
