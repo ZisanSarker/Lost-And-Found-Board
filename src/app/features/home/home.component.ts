@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HeroComponent } from "../../shared/components/hero/hero.component";
-import { SearchBarComponent } from "../../shared/components/search-bar/search-bar.component";
+import { AllPostsComponent } from "../../shared/components/all-posts/all-posts.component";
 
 @Component({
   selector: 'app-home',
-  imports: [RouterModule, HeroComponent, SearchBarComponent],
+  imports: [RouterModule, HeroComponent, AllPostsComponent],
   templateUrl: './home.component.html',
 })
 export class HomeComponent {

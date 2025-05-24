@@ -1,0 +1,108 @@
+{
+  "lostItems": [
+    {
+      "id": "lost-1",
+      "title": "Lost Wallet",
+      "description": "Brown leather wallet with ID and credit cards.",
+      "location": "Downtown",
+      "date": "May 11, 2025",
+      "type": "lost"
+    },
+    {
+      "id": "lost-2",
+      "title": "Lost Phone",
+      "description": "iPhone 13 Pro with blue case and cracked screen.",
+      "location": "North Side",
+      "date": "May 12, 2025",
+      "type": "lost"
+    },
+    {
+      "id": "lost-3",
+      "title": "Lost Keys",
+      "description": "Set of keys with a red keychain and house key.",
+      "location": "South Side",
+      "date": "May 13, 2025",
+      "type": "lost"
+    },
+    {
+      "id": "lost-4",
+      "title": "Lost Backpack",
+      "description": "Black North Face backpack with laptop inside.",
+      "location": "East Side",
+      "date": "May 14, 2025",
+      "type": "lost",
+      "image": "/placeholder.svg?height=200&width=400&text=Lost+Backpack"
+    },
+    {
+      "id": "lost-5",
+      "title": "Lost Laptop",
+      "description": "MacBook Pro 16-inch with stickers on the cover.",
+      "location": "West Side",
+      "date": "May 15, 2025",
+      "type": "lost",
+      "image": "/placeholder.svg?height=200&width=400&text=Lost+Laptop"
+    },
+    {
+      "id": "lost-6",
+      "title": "Lost Glasses",
+      "description": "Ray-Ban sunglasses in black case.",
+      "location": "Central Park",
+      "date": "May 16, 2025",
+      "type": "lost",
+      "image": "/placeholder.svg?height=200&width=400&text=Lost+Glasses"
+    }
+  ],
+  "foundItems": [
+    {
+      "id": "found-1",
+      "title": "Found Ring",
+      "description": "Gold ring with small diamond, possibly an engagement ring.",
+      "location": "Coffee Shop",
+      "date": "May 16, 2025",
+      "type": "found"
+    },
+    {
+      "id": "found-2",
+      "title": "Found Umbrella",
+      "description": "Black umbrella left at the bus stop.",
+      "location": "Bus Station",
+      "date": "May 17, 2025",
+      "type": "found"
+    },
+    {
+      "id": "found-3",
+      "title": "Found Watch",
+      "description": "Apple Watch with black band, locked.",
+      "location": "Gym",
+      "date": "May 18, 2025",
+      "type": "found"
+    },
+    {
+      "id": "found-4",
+      "title": "Found Headphones",
+      "description": "Sony wireless headphones in black case.",
+      "location": "Library",
+      "date": "May 19, 2025",
+      "type": "found",
+      "image": "/placeholder.svg?height=200&width=400&text=Found+Headphones"
+    },
+    {
+      "id": "found-5",
+      "title": "Found Scarf",
+      "description": "Red and black plaid scarf, wool material.",
+      "location": "Restaurant",
+      "date": "May 20, 2025",
+      "type": "found",
+      "image": "/placeholder.svg?height=200&width=400&text=Found+Scarf"
+    },
+    {
+      "id": "found-6",
+      "title": "Found Book",
+      "description": "Hardcover novel 'The Great Gatsby' with bookmark.",
+      "location": "Park",
+      "date": "May 21, 2025",
+      "type": "found",
+      "image": "/placeholder.svg?height=200&width=400&text=Found+Book"
+    }
+  ]
+}
