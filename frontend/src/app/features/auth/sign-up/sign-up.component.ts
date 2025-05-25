@@ -1,7 +1,3 @@
-import { environment } from '../../../../environments/environment';
-
-const baseUrl = environment.apiBaseUrl;
-
 import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
@@ -15,6 +11,9 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../../environments/environment';
+
+const baseUrl = environment.apiBaseUrl;
 
 @Component({
   selector: 'app-sign-up',
@@ -170,9 +169,9 @@ export class SignUpComponent {
           this.toast.success('Signup successful! Please log in.');
           this.router.navigate(['/login']);
         },
-        error: (err) => {
-          console.error('Signup failed', err);
-          this.toast.error(err?.error?.message || 'Signup failed.');
+        error: (error) => {
+          console.error(error?.error?.message);
+          this.toast.error(error?.error?.message || 'Signup failed. Please try again.');
         },
       });
   }

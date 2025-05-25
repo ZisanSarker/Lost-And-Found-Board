@@ -13,7 +13,11 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withFetch()),
     provideClientHydration(withEventReplay()),
-    provideToastr(),
+    provideToastr(
+      {
+        positionClass: 'toast-bottom-right',
+      }
+    ),
     importProvidersFrom(BrowserAnimationsModule)
   ]
 };
