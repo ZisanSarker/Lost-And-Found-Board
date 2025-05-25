@@ -104,5 +104,95 @@
       "type": "found",
       "image": "/placeholder.svg?height=200&width=400&text=Found+Book"
     }
+  ],
+  "myListings": [
+    {
+      "id": "lost-1",
+      "title": "Lost Wallet",
+      "description": "Brown leather wallet with ID and credit cards.",
+      "location": "Downtown Coffee Shop",
+      "date": "May 11, 2025",
+      "status": "active",
+      "type": "lost",
+      "image": "/placeholder.svg?height=200&width=400&text=Lost+Wallet"
+    },
+    {
+      "id": "found-2",
+      "title": "Found Umbrella",
+      "description": "Black umbrella left at the bus stop.",
+      "location": "5th Avenue Bus Stop",
+      "date": "May 17, 2025",
+      "status": "active",
+      "type": "found",
+      "image": "/placeholder.svg?height=200&width=400&text=Found+Umbrella"
+    },
+    {
+      "id": "lost-3",
+      "title": "Lost Keys",
+      "description": "Set of keys with a red keychain and house key.",
+      "location": "South Side Bus Station",
+      "date": "May 13, 2025",
+      "status": "resolved",
+      "type": "lost",
+      "image": "/placeholder.svg?height=200&width=400&text=Lost+Keys"
+    }
+  ],
+  "messages": [
+    {
+      "id": 1,
+      "from": "Sarah Williams",
+      "initial": "SW",
+      "message": "I think I found your wallet at the coffee shop. It matches your description.",
+      "time": "2 hours ago",
+      "itemId": "lost-1",
+      "itemTitle": "Lost Wallet",
+      "unread": true
+    },
+    {
+      "id": 2,
+      "from": "David Brown",
+      "initial": "DB",
+      "message": "Is the umbrella you found black with a wooden handle? I lost one like that.",
+      "time": "Yesterday",
+      "itemId": "found-2",
+      "itemTitle": "Found Umbrella",
+      "unread": false
+    },
+    {
+      "id": 3,
+      "from": "Emily Davis",
+      "initial": "ED",
+      "message": "Thank you for finding my keys! When can we meet so I can pick them up?",
+      "time": "3 days ago",
+      "itemId": "lost-3",
+      "itemTitle": "Lost Keys",
+      "unread": false
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "title": "Potential Match Found",
+      "description": "Someone reported finding a wallet that matches your lost item description.",
+      "time": "1 hour ago",
+      "itemId": "lost-1",
+      "unread": true
+    },
+    {
+      "id": 2,
+      "title": "New Message",
+      "description": "You have a new message about your found umbrella.",
+      "time": "Yesterday",
+      "itemId": "found-2",
+      "unread": true
+    },
+    {
+      "id": 3,
+      "title": "Item Resolved",
+      "description": "Your lost keys listing has been marked as resolved.",
+      "time": "3 days ago",
+      "itemId": "lost-3",
+      "unread": false
+    }
   ]
 }

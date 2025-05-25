@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -32,7 +32,6 @@ import { CommonModule } from '@angular/common';
         </svg>
         My Listings
       </button>
-
       <button
         [class]="getTabButtonClass('messages')"
         (click)="setActiveTab('messages')"
@@ -54,13 +53,12 @@ import { CommonModule } from '@angular/common';
           Messages
         </div>
         <span
-          *ngIf="getUnreadMessagesCount() > 0"
+          *ngIf="unreadMessagesCount > 0"
           class="bg-red-600 text-white text-xs px-2 py-1 rounded-full"
         >
-          {{ getUnreadMessagesCount() }}
+          {{ unreadMessagesCount }}
         </span>
       </button>
-
       <button
         [class]="getTabButtonClass('notifications')"
         (click)="setActiveTab('notifications')"
@@ -82,38 +80,33 @@ import { CommonModule } from '@angular/common';
           Notifications
         </div>
         <span
-          *ngIf="getUnreadNotificationsCount() > 0"
+          *ngIf="unreadNotificationsCount > 0"
           class="bg-red-600 text-white text-xs px-2 py-1 rounded-full"
         >
-          {{ getUnreadNotificationsCount() }}
+          {{ unreadNotificationsCount }}
         </span>
       </button>
     </div>
   `,
 })
 export class NotificationSidebarComponent {
-  activeTab = 'my-listings';
+  @Input() activeTab: string = 'my-listings';
+  @Input() unreadMessagesCount: number = 0;
+  @Input() unreadNotificationsCount: number = 0;
+  @Output() tabChange = new EventEmitter<string>();
 
   getTabButtonClass(tab: string): string {
     const baseClasses =
       'w-full flex items-center justify-between px-4 py-2 rounded-lg transition-all duration-300';
-    const activeClasses = 'bg-orange-500 text-white';
-    const inactiveClasses = 'text-gray-700 hover:bg-orange-100';
-
+    const activeClasses = 'bg-gradient-to-r from-orange-600 to-red-600 text-white';
+    const inactiveClasses = 'text-gray-700 dark:text-gray-300 hover:text-orange-700 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950';
+    
     return tab === this.activeTab
       ? `${baseClasses} ${activeClasses}`
       : `${baseClasses} ${inactiveClasses}`;
   }
 
   setActiveTab(tab: string) {
-    this.activeTab = tab;
-  }
-
-  getUnreadMessagesCount(): number {
-    return 2; // Replace with actual dynamic data
-  }
-
-  getUnreadNotificationsCount(): number {
-    return 1; // Replace with actual dynamic data
+    this.tabChange.emit(tab);
   }
 }
