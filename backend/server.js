@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const connectDB = require('./config/db');
+const profileRoutes = require('./routes/profile.routes');
 const authRoutes = require('./routes/auth.routes');
 require('colors');
 
@@ -52,6 +53,7 @@ app.use(
 
 // ───────────── Routes ─────────────
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
 
 app.get('/', (req, res) => {
   res.send(`

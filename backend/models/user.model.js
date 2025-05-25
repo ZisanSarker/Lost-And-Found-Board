@@ -29,19 +29,44 @@ const userSchema = new mongoose.Schema({
     minlength: [8, 'Password must be at least 8 characters'],
     select: false,
   },
-  profilePicture: {
+    phone: {
     type: String,
-    default: 'default.jpg',
+    trim: true,
+    validate: {
+      validator: function(val) {
+        // Allow empty phone or validate phone format
+        return !val || validator.isMobilePhone(val);
+      },
+      message: 'Please provide a valid phone number'
+    }
+  },
+  location: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Location cannot exceed 100 characters'],
+    default: '',
+  },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: [500, 'Bio cannot exceed 500 characters'],
+    default: '',
+  },
+  avatar: {
+    type: String,
+    default: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
   },
 
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-
-  isEmailVerified: {
+  // Verification status
+  verified: {
     type: Boolean,
     default: false,
+  },
+  
+  // Join date (this will be automatically set by timestamps: true, but adding explicit field)
+  joinDate: {
+    type: Date,
+    default: Date.now,
   },
 
   lastLogin: {
