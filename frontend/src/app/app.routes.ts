@@ -1,9 +1,23 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { authRoutes } from './features/auth/auth.routes';
+import { AuthGuard } from './features/auth/auth.guard';
+import { UnAuthGuard } from './features/auth/unauth.guard';
 
 export const routes: Routes = [
-  // routes WITH layout
+  // Auth routes outside Layout (no AuthGuard needed here)
+  {
+    path: 'auth/sign-in',
+    canActivate: [UnAuthGuard],
+    loadComponent: () =>
+      import('./features/auth/sign-in/sign-in.component').then((m) => m.SignInComponent),
+  },
+  {
+    path: 'auth/sign-up',
+    canActivate: [UnAuthGuard],
+    loadComponent: () =>
+      import('./features/auth/sign-up/sign-up.component').then((m) => m.SignUpComponent),
+  },
+  // Main app routes inside LayoutComponent
   {
     path: '',
     component: LayoutComponent,
@@ -20,6 +34,7 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
+        canActivate: [AuthGuard],
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent
@@ -27,6 +42,7 @@ export const routes: Routes = [
       },
       {
         path: 'messages',
+        canActivate: [AuthGuard],
         loadComponent: () =>
           import('./features/messages/messages.component').then(
             (m) => m.MessagesComponent
@@ -34,6 +50,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        canActivate: [AuthGuard],
         loadComponent: () =>
           import('./features/profile/profile.component').then(
             (m) => m.ProfileComponent
@@ -60,6 +77,7 @@ export const routes: Routes = [
       },
       {
         path: 'report/lost',
+        canActivate: [AuthGuard],
         loadComponent: () =>
           import('./features/report/lost/lost.component').then(
             (m) => m.LostComponent
@@ -67,6 +85,7 @@ export const routes: Routes = [
       },
       {
         path: 'report/found',
+        canActivate: [AuthGuard],
         loadComponent: () =>
           import('./features/report/found/found.component').then(
             (m) => m.FoundComponent
@@ -74,16 +93,9 @@ export const routes: Routes = [
       },
     ],
   },
-
-  // routes WITHOUT layout (auth)
-  {
-    path: 'auth',
-    children: authRoutes,
-  },
-
-  // catch all
+  // catch all - redirect unauthenticated users to sign-in
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'auth/sign-in',
   },
 ];

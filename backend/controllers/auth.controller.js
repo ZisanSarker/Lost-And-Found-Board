@@ -52,7 +52,9 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       message: 'Registered successfully',
-      user: sanitizeUser(newUser)
+      user: sanitizeUser(newUser),
+      accessToken,
+      refreshToken
     });
   } catch (err) {
     console.error(`Register Error: ${err.message}`.red.bold);
@@ -85,7 +87,9 @@ exports.login = async (req, res) => {
 
     res.status(200).json({
       message: 'Logged in successfully',
-      user: sanitizeUser(user)
+      user: sanitizeUser(user),
+      accessToken,
+      refreshToken
     });
   } catch (err) {
     console.error(`Login Error: ${err.message}`.red.bold);
