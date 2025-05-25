@@ -12,15 +12,12 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: function () {
-      return !this.githubId && !this.facebookId;
-    },
+    required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
     trim: true,
     validate: {
       validator: function (val) {
-        if (!val && this.githubId && this.facebookId) return true; // allow empty if GitHub login
         return validator.isEmail(val);
       },
       message: 'Please provide a valid email',
@@ -28,37 +25,13 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: function () {
-      return !this.googleId && !this.githubId && !this.facebookId;
-    },
+    required: [true, 'Password is required'],
     minlength: [8, 'Password must be at least 8 characters'],
     select: false,
-  },
-
-  googleId: {
-    type: String,
-    unique: true,
-    sparse: true,
-  },
-  githubId: {
-    type: String,
-    unique: true,
-    sparse: true,
-  },
-  facebookId: {
-    type: String,
-    unique: true,
-    sparse: true,
   },
   profilePicture: {
     type: String,
     default: 'default.jpg',
-  },
-
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user',
   },
 
   isActive: {
@@ -85,23 +58,8 @@ const userSchema = new mongoose.Schema({
   toObject: { virtuals: true },
 });
 
-// 🔍 Index on username for efficient querying
 userSchema.index({ username: 1 });
 
-/**
- * VIRTUAL: Auth provider
- * Determines whether the user signed up via local, Google, or GitHub
- */
-userSchema.virtual('provider').get(function () {
-  if (this.googleId) return 'google';
-  if (this.githubId) return 'github';
-  if (this.facebookId) return 'facebook';
-  return 'local';
-});
-
-/**
- * Pre-save hook: hash password if modified
- */
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
@@ -118,9 +76,7 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-/**
- * Instance method: compare passwords
- */
+
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };

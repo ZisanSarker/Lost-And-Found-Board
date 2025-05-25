@@ -8,7 +8,6 @@ const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth.routes');
-const passport = require('./config/passport')
 require('colors');
 
 // Load environment variables
@@ -50,9 +49,6 @@ app.use(
     },
   })
 );
-// ───────────── Passport ─────────────
-app.use(passport.initialize());
-app.use(passport.session());
 
 // ───────────── Routes ─────────────
 app.use('/api/auth', authRoutes);

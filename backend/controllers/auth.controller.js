@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const generateTokens = require('../utils/generateTokens');
 const validator = require('validator');
-const passport = require('../config/passport');
 require('colors');
 
 const cookieOptions = (maxAge) => ({
@@ -164,93 +163,3 @@ exports.getCurrentUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-// ─────────── oAuth 2.0 Google ───────────
-exports.startGoogleAuth = passport.authenticate('google', {
-  scope: ['profile', 'email'],
-});
-exports.handleGoogleCallback = [
-  passport.authenticate('google', {
-    failureRedirect: '/login',
-  }),
-  async (req, res) => {
-    try {
-      // User object is already set by passport
-      const user = req.user;
-      
-      // Update last login
-      user.lastLogin = Date.now();
-      
-      await user.save({ validateBeforeSave: false });
-
-      // Generate JWT tokens
-      const { accessToken, refreshToken } = generateTokens(user._id);
-      // Set cookies
-      res.cookie('accessToken', accessToken, cookieOptions(15 * 60 * 1000));
-      res.cookie('refreshToken', refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
-
-      console.log(`Logged in via Google: ${user.email}`.blue.bold);
-
-      // Redirect to home or dashboard
-      res.redirect(process.env.FRONTEND_URL || '/');
-    } catch (err) {
-      console.error(`Google Auth Error: ${err.message}`.red.bold);
-    }
-  }
-];
-
-// ─────────── oAuth 2.0 GitHub ───────────
-exports.startGithubAuth = passport.authenticate('github', {
-  scope: ['user:email'],
-});
-
-exports.handleGithubCallback = [
-  passport.authenticate('github', {
-    failureRedirect: '/login',
-  }),
-  async (req, res) => {
-    try {
-      const user = req.user;
-      user.lastLogin = Date.now();
-      await user.save({ validateBeforeSave: false });
-
-      const { accessToken, refreshToken } = generateTokens(user._id);
-
-      res.cookie('accessToken', accessToken, cookieOptions(15 * 60 * 1000));
-      res.cookie('refreshToken', refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
-
-      console.log(`Logged in via GitHub: ${user.email}`.cyan.bold);
-      res.redirect(process.env.FRONTEND_URL || '/');
-    } catch (err) {
-      console.error(`GitHub Auth Error: ${err.message}`.red.bold);
-    }
-  },
-];
-
-// ─────────── oAuth 2.0 Facebook ───────────
-exports.startFacebookAuth = passport.authenticate('facebook', {
-  scope: ['email'],
-});
-
-exports.handleFacebookCallback = [
-  passport.authenticate('facebook', {
-    failureRedirect: '/login',
-  }),
-  async (req, res) => {
-    try {
-      const user = req.user;
-      user.lastLogin = Date.now();
-      await user.save({ validateBeforeSave: false });
-
-      const { accessToken, refreshToken } = generateTokens(user._id);
-
-      res.cookie('accessToken', accessToken, cookieOptions(15 * 60 * 1000));
-      res.cookie('refreshToken', refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
-
-      console.log(`Logged in via Facebook: ${user.email}`.magenta.bold);
-      res.redirect(process.env.FRONTEND_URL || '/');
-    } catch (err) {
-      console.error(`Facebook Auth Error: ${err.message}`.red.bold);
-    }
-  },
-];
