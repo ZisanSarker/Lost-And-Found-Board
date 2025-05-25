@@ -191,5 +191,51 @@
       "itemId": "lost-3",
       "unread": false
     }
-  ]
+  ],
+  "users": [
+    {
+      "id": "user_001",
+      "name": "Sarah Johnson",
+      "email": "sarah.johnson@email.com",
+      "phone": "+1 (555) 987-6543",
+      "location": "San Francisco, CA",
+      "joinDate": "2023-03-20T00:00:00.000Z",
+      "avatar": "https://images.unsplash.com/photo-1494790108755-2616b2fe4be8?w=150&h=150&fit=crop&crop=face",
+      "itemsFound": 18,
+      "itemsLost": 2,
+      "itemsReturned": 15,
+      "bio": "Community volunteer and lost item detective! I've been helping people reunite with their belongings for over a year. My specialties include finding lost jewelry, electronics, and pet accessories. When I'm not on the hunt for lost items, I enjoy yoga, cooking, and exploring local farmers markets.",
+      "verified": true
+    },
+    {
+      "id": "user_002",
+      "name": "Michael Chen",
+      "email": "m.chen@email.com",
+      "phone": "+1 (555) 234-5678",
+      "location": "Austin, TX",
+      "joinDate": "2022-11-08T00:00:00.000Z",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+      "itemsFound": 24,
+      "itemsLost": 4,
+      "itemsReturned": 20,
+      "bio": "Tech enthusiast and amateur photographer who stumbled into the world of lost and found. I have a knack for tracking down lost electronics and cameras. My background in IT helps me understand the value of digital memories stored in devices. Always happy to help fellow community members!",
+      "verified": true
+    },
+    {
+      "id": "user_003",
+      "name": "Emma Rodriguez",
+      "email": "emma.r@email.com",
+      "phone": "+1 (555) 456-7890",
+      "location": "Chicago, IL",
+      "joinDate": "2023-07-12T00:00:00.000Z",
+      "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+      "itemsFound": 9,
+      "itemsLost": 1,
+      "itemsReturned": 7,
+      "bio": "Recent graduate student who discovered this amazing community through losing my own keys! Since then, I've made it my mission to help others avoid the stress I felt. I'm particularly good at finding items in university areas and public transportation spots.",
+      "verified": false
+    }
+  ],
+  "currentUser": "user_001"
+
 }
