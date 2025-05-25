@@ -35,6 +35,7 @@ import { CommonModule } from '@angular/common';
       <button
         [class]="getTabButtonClass('messages')"
         (click)="setActiveTab('messages')"
+        class="border-2 border-orange-600"
       >
         <div class="flex items-center">
           <svg
@@ -62,6 +63,7 @@ import { CommonModule } from '@angular/common';
       <button
         [class]="getTabButtonClass('notifications')"
         (click)="setActiveTab('notifications')"
+        class="border-2 border-orange-600"
       >
         <div class="flex items-center">
           <svg

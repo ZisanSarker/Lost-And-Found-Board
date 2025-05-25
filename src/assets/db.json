@@ -113,8 +113,7 @@
       "location": "Downtown Coffee Shop",
       "date": "May 11, 2025",
       "status": "active",
-      "type": "lost",
-      "image": "/placeholder.svg?height=200&width=400&text=Lost+Wallet"
+      "type": "lost"
     },
     {
       "id": "found-2",
@@ -123,8 +122,7 @@
       "location": "5th Avenue Bus Stop",
       "date": "May 17, 2025",
       "status": "active",
-      "type": "found",
-      "image": "/placeholder.svg?height=200&width=400&text=Found+Umbrella"
+      "type": "found"
     },
     {
       "id": "lost-3",
@@ -133,8 +131,7 @@
       "location": "South Side Bus Station",
       "date": "May 13, 2025",
       "status": "resolved",
-      "type": "lost",
-      "image": "/placeholder.svg?height=200&width=400&text=Lost+Keys"
+      "type": "lost"
     }
   ],
   "messages": [
