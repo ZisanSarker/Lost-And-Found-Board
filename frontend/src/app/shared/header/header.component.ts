@@ -9,5 +9,5 @@ import { RouterModule } from '@angular/router';
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {
-  isLoggedIn = true; // Replace with actual auth state logic
+  isLoggedIn = false; // Replace with actual auth state logic
 }

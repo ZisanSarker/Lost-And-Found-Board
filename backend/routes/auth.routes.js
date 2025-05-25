@@ -1,0 +1,17 @@
+const express = require('express');
+const controller = require('../controllers/auth.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
+const router = express.Router();
+
+// ──────── Local Auth Routes ────────
+
+// Public routes
+router.post('/register', controller.register);
+router.post('/login', controller.login);
+router.post('/refresh-token', controller.refreshToken);
+
+// Protected routes
+router.get('/logout', authMiddleware, controller.logout);
+router.get('/me', authMiddleware, controller.getCurrentUser);
+
+module.exports = router;
