@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 
@@ -283,26 +284,6 @@ interface ApiResponse {
                       Cancel
                     </button>
                   </div>
-
-                  <!-- <button
-                    (click)="logout()"
-                    class="inline-flex items-center gap-2 bg-red-500/80 hover:bg-red-500 backdrop-blur-sm rounded-xl px-6 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                      ></path>
-                    </svg>
-                    Logout
-                  </button> -->
                 </div>
               </div>
             </div>
@@ -446,7 +427,10 @@ interface ApiResponse {
                 *ngIf="!isEditing()"
                 class="text-gray-700 leading-relaxed bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl"
               >
-                {{ userProfile()!.bio || 'No bio available yet. Click edit to add one!' }}
+                {{
+                  userProfile()!.bio ||
+                    'No bio available yet. Click edit to add one!'
+                }}
               </p>
               <textarea
                 *ngIf="isEditing()"
@@ -460,118 +444,132 @@ interface ApiResponse {
         </div>
 
         <!-- Account Actions -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100">
-          <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-            <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        <div
+          class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100"
+        >
+          <h3
+            class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3"
+          >
+            <div
+              class="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center"
+            >
+              <svg
+                class="w-4 h-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
               </svg>
             </div>
             Account Actions
           </h3>
-          
+
           <div class="flex flex-wrap gap-4">
             <button
               (click)="deleteAccount()"
               class="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                ></path>
               </svg>
               Delete Account
             </button>
           </div>
         </div>
       </div>
-
-      <!-- Toast Message -->
+      <!-- Delete Account Confirmation Modal -->
       <div
-        *ngIf="message()"
-        class="fixed top-6 right-6 z-50 p-4 rounded-xl shadow-lg backdrop-blur-sm animate-in slide-in-from-right-full duration-300"
-        [class.bg-emerald-500]="messageType() === 'success'"
-        [class.text-white]="messageType() === 'success'"
-        [class.bg-red-500]="messageType() === 'error'"
-        [class.text-white]="messageType() === 'error'"
+        *ngIf="showDeleteModal()"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300"
+        (click)="cancelDeleteAccount()"
       >
-        <div class="flex items-center gap-3">
-          <svg
-            *ngIf="messageType() === 'success'"
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div
+          class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-300"
+          (click)="$event.stopPropagation()"
+        >
+          <!-- Warning Icon -->
+          <div
+            class="flex items-center justify-center w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 13l4 4L19 7"
-            ></path>
-          </svg>
-          <svg
-            *ngIf="messageType() === 'error'"
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
-          </svg>
-          <span class="font-medium">{{ message() }}</span>
+            <svg
+              class="w-8 h-8 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"
+              ></path>
+            </svg>
+          </div>
+
+          <!-- Modal Content -->
+          <div class="text-center mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">
+              Delete Account
+            </h3>
+            <p class="text-gray-600 mb-4">
+              Are you sure you want to delete your account? This action cannot
+              be undone.
+            </p>
+            <p class="text-red-600 font-semibold">
+              This will permanently delete all your data.
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-4">
+            <button
+              (click)="cancelDeleteAccount()"
+              class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="confirmDeleteAccount()"
+              class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            >
+              Delete Account
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `,
-  styles: [
-    `
-      @keyframes animate-in {
-        from {
-          opacity: 0;
-          transform: translateY(16px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .animate-in {
-        animation: animate-in 0.3s ease-out;
-      }
-
-      .slide-in-from-right-full {
-        animation: slide-in-from-right-full 0.3s ease-out;
-      }
-
-      @keyframes slide-in-from-right-full {
-        from {
-          transform: translateX(100%);
-        }
-        to {
-          transform: translateX(0);
-        }
-      }
-    `,
-  ],
+  styles: [],
 })
 export class ProfileComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private toastr = inject(ToastrService);
 
   // Signals for state management
   loading = signal(false);
   error = signal('');
   saving = signal(false);
   isEditing = signal(false);
-  message = signal('');
-  messageType = signal('');
-  userProfile = signal<UserProfile | null>(null)
+  userProfile = signal<UserProfile | null>(null);
+  showDeleteModal = signal(false);
 
   editForm: Partial<UserProfile> = {};
 
@@ -582,8 +580,8 @@ export class ProfileComponent implements OnInit {
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();
     return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     });
   }
 
@@ -591,36 +589,39 @@ export class ProfileComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
 
-    this.http.get<ApiResponse>(`${baseUrl}/api/profile`, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
-      next: (response) => {
-        const userWithDate = {
-          ...response.user,
-          joinDate: new Date(response.user.joinDate),
-        };
-        this.userProfile.set(userWithDate);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        console.error('Error loading profile:', err);
-        let errorMessage = 'Failed to load profile data.';
-        
-        if (err.status === 401) {
-          errorMessage = 'Session expired. Please login again.';
-          this.handleAuthError();
-        } else if (err.status === 404) {
-          errorMessage = 'Profile not found.';
-        } else if (err.status === 0) {
-          errorMessage = 'Cannot connect to server. Please check if the backend is running.';
-        } else if (err.error?.message) {
-          errorMessage = err.error.message;
-        }
-        
-        this.error.set(errorMessage);
-        this.loading.set(false);
-      },
-    });
+    this.http
+      .get<ApiResponse>(`${baseUrl}/api/profile`, {
+        headers: this.getAuthHeaders(),
+      })
+      .subscribe({
+        next: (response) => {
+          const userWithDate = {
+            ...response.user,
+            joinDate: new Date(response.user.joinDate),
+          };
+          this.userProfile.set(userWithDate);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Error loading profile:', err);
+          let errorMessage = 'Failed to load profile data.';
+
+          if (err.status === 401) {
+            errorMessage = 'Session expired. Please login again.';
+            this.handleAuthError();
+          } else if (err.status === 404) {
+            errorMessage = 'Profile not found.';
+          } else if (err.status === 0) {
+            errorMessage =
+              'Cannot connect to server. Please check if the backend is running.';
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          }
+
+          this.error.set(errorMessage);
+          this.loading.set(false);
+        },
+      });
   }
 
   startEditing() {
@@ -632,7 +633,7 @@ export class ProfileComponent implements OnInit {
         email: profile.email,
         phone: profile.phone,
         location: profile.location,
-        bio: profile.bio
+        bio: profile.bio,
       };
       this.isEditing.set(true);
     }
@@ -646,7 +647,7 @@ export class ProfileComponent implements OnInit {
   saveProfile() {
     // Client-side validation
     if (!this.editForm.username?.trim()) {
-      this.showMessage('Username is required', 'error');
+      this.toastr.error('Username is required');
       return;
     }
 
@@ -657,106 +658,99 @@ export class ProfileComponent implements OnInit {
       username: this.editForm.username.trim(),
       phone: this.editForm.phone?.trim() || '',
       location: this.editForm.location?.trim() || '',
-      bio: this.editForm.bio?.trim() || ''
+      bio: this.editForm.bio?.trim() || '',
     };
 
-    this.http.patch<ApiResponse>(`${baseUrl}/api/profile`, updateData, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
-      next: (response) => {
-        const updatedUser = {
-          ...response.user,
-          joinDate: new Date(response.user.joinDate),
-        };
-        this.userProfile.set(updatedUser);
-        this.isEditing.set(false);
-        this.saving.set(false);
-        this.editForm = {};
-        this.showMessage('Profile updated successfully!', 'success');
-      },
-      error: (err) => {
-        console.error('Error updating profile:', err);
-        let errorMessage = 'Failed to update profile.';
-        
-        if (err.status === 401) {
-          errorMessage = 'Session expired. Please login again.';
-          this.handleAuthError();
-        } else if (err.status === 400) {
-          errorMessage = err.error?.message || 'Invalid data provided.';
-        } else if (err.status === 409) {
-          errorMessage = 'Username or email already exists.';
-        } else if (err.error?.message) {
-          errorMessage = err.error.message;
-        }
-        
-        this.showMessage(errorMessage, 'error');
-        this.saving.set(false);
-      }
-    });
+    this.http
+      .patch<ApiResponse>(`${baseUrl}/api/profile`, updateData, {
+        headers: this.getAuthHeaders(),
+      })
+      .subscribe({
+        next: (response) => {
+          const updatedUser = {
+            ...response.user,
+            joinDate: new Date(response.user.joinDate),
+          };
+          this.userProfile.set(updatedUser);
+          this.isEditing.set(false);
+          this.saving.set(false);
+          this.editForm = {};
+          this.toastr.success('Profile updated successfully!');
+        },
+        error: (err) => {
+          console.error('Error updating profile:', err);
+          let errorMessage = 'Failed to update profile.';
+
+          if (err.status === 401) {
+            errorMessage = 'Session expired. Please login again.';
+            this.handleAuthError();
+          } else if (err.status === 400) {
+            errorMessage = err.error?.message || 'Invalid data provided.';
+          } else if (err.status === 409) {
+            errorMessage = 'Username or email already exists.';
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          }
+
+          this.toastr.error(errorMessage);
+          this.saving.set(false);
+        },
+      });
   }
 
   deleteAccount() {
-    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      return;
-    }
+    this.showDeleteModal.set(true);
+  }
+  confirmDeleteAccount() {
+    this.showDeleteModal.set(false);
 
-    if (!confirm('This will permanently delete all your data. Are you absolutely sure?')) {
-      return;
-    }
+    this.http
+      .delete(`${baseUrl}/api/profile`, {
+        headers: this.getAuthHeaders(),
+      })
+      .subscribe({
+        next: () => {
+          this.toastr.success('Account deleted successfully');
+          setTimeout(() => {
+            this.logout();
+          }, 2000);
+        },
+        error: (err) => {
+          console.error('Error deleting account:', err);
+          let errorMessage = 'Failed to delete account.';
 
-    this.http.delete(`${baseUrl}/api/profile`, {
-      headers: this.getAuthHeaders()
-    }).subscribe({
-      next: () => {
-        this.showMessage('Account deleted successfully', 'success');
-        setTimeout(() => {
-          this.logout();
-        }, 2000);
-      },
-      error: (err) => {
-        console.error('Error deleting account:', err);
-        let errorMessage = 'Failed to delete account.';
-        
-        if (err.status === 401) {
-          errorMessage = 'Session expired. Please login again.';
-          this.handleAuthError();
-        } else if (err.error?.message) {
-          errorMessage = err.error.message;
-        }
-        
-        this.showMessage(errorMessage, 'error');
-      }
-    });
+          if (err.status === 401) {
+            errorMessage = 'Session expired. Please login again.';
+            this.handleAuthError();
+          } else if (err.error?.message) {
+            errorMessage = err.error.message;
+          }
+
+          this.toastr.error(errorMessage);
+        },
+      });
+  }
+  cancelDeleteAccount() {
+    this.showDeleteModal.set(false);
   }
 
   logout() {
     this.authService.logout();
-    this.showMessage('Logged out successfully', 'success');
+    this.toastr.success('Logged out successfully');
   }
 
   private handleAuthError() {
     this.authService.logout();
   }
 
-  private showMessage(msg: string, type: 'success' | 'error') {
-    this.message.set(msg);
-    this.messageType.set(type);
-    
-    // Auto-hide message after 5 seconds
-    setTimeout(() => {
-      this.message.set('');
-      this.messageType.set('');
-    }, 5000);
-  }
-
   formatDate(date: Date): string {
     if (!date) return 'Unknown';
-    
+
     try {
       return new Intl.DateTimeFormat('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
       }).format(new Date(date));
     } catch (error) {
       console.error('Error formatting date:', error);
