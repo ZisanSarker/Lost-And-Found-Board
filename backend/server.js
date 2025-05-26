@@ -9,6 +9,8 @@ const session = require('express-session');
 const connectDB = require('./config/db');
 const profileRoutes = require('./routes/profile.routes');
 const authRoutes = require('./routes/auth.routes');
+const itemRoutes = require('./routes/item.routes');
+const authMiddleware = require('./middlewares/auth.middleware');
 require('colors');
 
 // Load environment variables
@@ -53,7 +55,8 @@ app.use(
 
 // ───────────── Routes ─────────────
 app.use('/api/auth', authRoutes);
-app.use('/api/profile', profileRoutes);
+app.use('/api/profile',authMiddleware, profileRoutes);
+app.use('/api/items',authMiddleware, itemRoutes);
 
 app.get('/', (req, res) => {
   res.send(`
