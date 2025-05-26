@@ -1,26 +1,30 @@
 import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../auth/auth.service';
+
+const baseUrl = environment.apiBaseUrl;
 
 interface UserProfile {
-  id: string;
-  name: string;
+  _id: string;
+  username: string;
   email: string;
   phone: string;
   location: string;
   joinDate: Date;
   avatar: string;
-  itemsFound: number;
-  itemsLost: number;
-  itemsReturned: number;
   bio: string;
   verified: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface ApiResponse {
-  users: UserProfile[];
-  currentUser: string;
+  message: string;
+  user: UserProfile;
 }
 
 @Component({
@@ -101,45 +105,17 @@ interface ApiResponse {
 
           <div class="relative p-8 md:p-12">
             <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-              <!-- Avatar Section -->
+              <!-- Avatar Section (Static - No Upload Functionality) -->
               <div class="relative group">
-                <div
-                  class="relative cursor-pointer transition-transform duration-300 hover:scale-105"
-                  (click)="triggerFileInput()"
-                >
+                <div class="relative">
                   <div
                     class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/20 to-white/5 p-1 backdrop-blur-sm"
                   >
                     <img
                       [src]="userProfile()!.avatar"
-                      [alt]="userProfile()!.name"
+                      [alt]="userProfile()!.username"
                       class="w-full h-full rounded-full object-cover border-4 border-white/30 shadow-2xl"
                     />
-                  </div>
-
-                  <!-- Hover Overlay -->
-                  <div
-                    class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  >
-                    <svg
-                      class="w-8 h-8 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                      ></path>
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                      ></path>
-                    </svg>
                   </div>
                 </div>
 
@@ -160,14 +136,6 @@ interface ApiResponse {
                     ></path>
                   </svg>
                 </div>
-
-                <input
-                  #fileInput
-                  type="file"
-                  accept="image/*"
-                  (change)="onFileSelected($event)"
-                  class="hidden"
-                />
               </div>
 
               <!-- User Info -->
@@ -178,13 +146,13 @@ interface ApiResponse {
                     *ngIf="!isEditing()"
                     class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-2 bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent"
                   >
-                    {{ userProfile()!.name }}
+                    {{ userProfile()!.username }}
                   </h1>
                   <input
                     *ngIf="isEditing()"
-                    [(ngModel)]="editForm.name"
+                    [(ngModel)]="editForm.username"
                     class="text-4xl md:text-5xl font-bold bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl px-6 py-3 text-white placeholder-white/60 focus:border-white/40 focus:outline-none transition-all duration-300 w-full max-w-lg"
-                    placeholder="Enter your name"
+                    placeholder="Enter your username"
                   />
                 </div>
 
@@ -232,7 +200,7 @@ interface ApiResponse {
                       ></path>
                     </svg>
                     <span *ngIf="!isEditing()" class="font-medium">{{
-                      userProfile()!.location
+                      userProfile()!.location || 'Location not set'
                     }}</span>
                     <input
                       *ngIf="isEditing()"
@@ -316,7 +284,7 @@ interface ApiResponse {
                     </button>
                   </div>
 
-                  <button
+                  <!-- <button
                     (click)="logout()"
                     class="inline-flex items-center gap-2 bg-red-500/80 hover:bg-red-500 backdrop-blur-sm rounded-xl px-6 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
                   >
@@ -334,110 +302,8 @@ interface ApiResponse {
                       ></path>
                     </svg>
                     Logout
-                  </button>
+                  </button> -->
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stats Section -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div
-            class="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg shadow-emerald-500/10 border border-emerald-100 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-500 hover:-translate-y-2"
-          >
-            <div
-              class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            ></div>
-            <div class="relative flex items-center gap-4">
-              <div
-                class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300"
-              >
-                <svg
-                  class="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
-              </div>
-              <div>
-                <div class="text-3xl font-bold text-gray-800 mb-1">
-                  {{ userProfile()!.itemsFound }}
-                </div>
-                <div class="text-gray-600 font-medium">Items Found</div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg shadow-orange-500/10 border border-orange-100 hover:shadow-xl hover:shadow-orange-500/20 transition-all duration-500 hover:-translate-y-2"
-          >
-            <div
-              class="absolute inset-0 bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            ></div>
-            <div class="relative flex items-center gap-4">
-              <div
-                class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300"
-              >
-                <svg
-                  class="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  ></path>
-                </svg>
-              </div>
-              <div>
-                <div class="text-3xl font-bold text-gray-800 mb-1">
-                  {{ userProfile()!.itemsLost }}
-                </div>
-                <div class="text-gray-600 font-medium">Items Lost</div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg shadow-blue-500/10 border border-blue-100 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-500 hover:-translate-y-2"
-          >
-            <div
-              class="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            ></div>
-            <div class="relative flex items-center gap-4">
-              <div
-                class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300"
-              >
-                <svg
-                  class="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  ></path>
-                </svg>
-              </div>
-              <div>
-                <div class="text-3xl font-bold text-gray-800 mb-1">
-                  {{ userProfile()!.itemsReturned }}
-                </div>
-                <div class="text-gray-600 font-medium">Items Returned</div>
               </div>
             </div>
           </div>
@@ -503,6 +369,7 @@ interface ApiResponse {
                     *ngIf="isEditing()"
                     [(ngModel)]="editForm.email"
                     type="email"
+                    disabled
                     class="w-full bg-white border-2 border-gray-200 rounded-lg px-4 py-2 text-gray-700 focus:border-orange-500 focus:outline-none transition-colors duration-300"
                     placeholder="Enter email"
                   />
@@ -533,7 +400,7 @@ interface ApiResponse {
                   <span
                     *ngIf="!isEditing()"
                     class="text-gray-700 font-medium"
-                    >{{ userProfile()!.phone }}</span
+                    >{{ userProfile()!.phone || 'Phone not set' }}</span
                   >
                   <input
                     *ngIf="isEditing()"
@@ -579,7 +446,7 @@ interface ApiResponse {
                 *ngIf="!isEditing()"
                 class="text-gray-700 leading-relaxed bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl"
               >
-                {{ userProfile()!.bio }}
+                {{ userProfile()!.bio || 'No bio available yet. Click edit to add one!' }}
               </p>
               <textarea
                 *ngIf="isEditing()"
@@ -589,6 +456,30 @@ interface ApiResponse {
                 rows="6"
               ></textarea>
             </div>
+          </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+            <div class="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            Account Actions
+          </h3>
+          
+          <div class="flex flex-wrap gap-4">
+            <button
+              (click)="deleteAccount()"
+              class="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              Delete Account
+            </button>
           </div>
         </div>
       </div>
@@ -670,6 +561,8 @@ interface ApiResponse {
 })
 export class ProfileComponent implements OnInit {
   private http = inject(HttpClient);
+  private router = inject(Router);
+  private authService = inject(AuthService);
 
   // Signals for state management
   loading = signal(false);
@@ -678,39 +571,53 @@ export class ProfileComponent implements OnInit {
   isEditing = signal(false);
   message = signal('');
   messageType = signal('');
-  userProfile = signal<UserProfile | null>(null);
+  userProfile = signal<UserProfile | null>(null)
 
-  editForm: any = {};
+  editForm: Partial<UserProfile> = {};
 
   ngOnInit() {
     this.loadProfile();
+  }
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
   }
 
   loadProfile() {
     this.loading.set(true);
     this.error.set('');
 
-    const currentUserId = 'user_001'; // hardcoded or get it from auth service
-
-    this.http.get<any[]>('http://localhost:3000/users').subscribe({
-      next: (users) => {
-        const currentUser = users.find((user) => user.id === currentUserId);
-        if (currentUser) {
-          const userWithDate = {
-            ...currentUser,
-            joinDate: new Date(currentUser.joinDate),
-          };
-          this.userProfile.set(userWithDate);
-        } else {
-          this.error.set('Current user not found');
-        }
+    this.http.get<ApiResponse>(`${baseUrl}/api/profile`, {
+      headers: this.getAuthHeaders()
+    }).subscribe({
+      next: (response) => {
+        const userWithDate = {
+          ...response.user,
+          joinDate: new Date(response.user.joinDate),
+        };
+        this.userProfile.set(userWithDate);
         this.loading.set(false);
       },
       error: (err) => {
         console.error('Error loading profile:', err);
-        this.error.set(
-          'Failed to load profile data. Please check if json-server is running on port 3000.'
-        );
+        let errorMessage = 'Failed to load profile data.';
+        
+        if (err.status === 401) {
+          errorMessage = 'Session expired. Please login again.';
+          this.handleAuthError();
+        } else if (err.status === 404) {
+          errorMessage = 'Profile not found.';
+        } else if (err.status === 0) {
+          errorMessage = 'Cannot connect to server. Please check if the backend is running.';
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        }
+        
+        this.error.set(errorMessage);
         this.loading.set(false);
       },
     });
@@ -718,7 +625,15 @@ export class ProfileComponent implements OnInit {
 
   startEditing() {
     if (this.userProfile()) {
-      this.editForm = { ...this.userProfile()! };
+      // Copy current profile data to edit form
+      const profile = this.userProfile()!;
+      this.editForm = {
+        username: profile.username,
+        email: profile.email,
+        phone: profile.phone,
+        location: profile.location,
+        bio: profile.bio
+      };
       this.isEditing.set(true);
     }
   }
@@ -729,95 +644,123 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile() {
-    // Validate form
-    if (!this.editForm.name || !this.editForm.email) {
-      this.showMessage('Please fill in all required fields', 'error');
+    // Client-side validation
+    if (!this.editForm.username?.trim()) {
+      this.showMessage('Username is required', 'error');
       return;
     }
 
     this.saving.set(true);
 
-    // Simulate API call to update profile
-    const updatedProfile = {
-      ...this.userProfile()!,
-      ...this.editForm,
+    // Prepare update data
+    const updateData = {
+      username: this.editForm.username.trim(),
+      phone: this.editForm.phone?.trim() || '',
+      location: this.editForm.location?.trim() || '',
+      bio: this.editForm.bio?.trim() || ''
     };
 
-    // For demonstration, we'll update locally
-    // In a real app, you would make an HTTP PUT/PATCH request
-    setTimeout(() => {
-      this.userProfile.set(updatedProfile);
-      this.isEditing.set(false);
-      this.saving.set(false);
-      this.showMessage('Profile updated successfully!', 'success');
-    }, 1000);
-
-    // Uncomment this for actual API call:
-    /*
-    this.http.put<UserProfile>(`http://localhost:3000/users/${this.userProfile()!.id}`, updatedProfile)
-      .subscribe({
-        next: (response) => {
-          this.userProfile.set(response);
-          this.isEditing.set(false);
-          this.saving.set(false);
-          this.showMessage('Profile updated successfully!', 'success');
-        },
-        error: (err) => {
-          console.error('Error updating profile:', err);
-          this.saving.set(false);
-          this.showMessage('Failed to update profile', 'error');
+    this.http.patch<ApiResponse>(`${baseUrl}/api/profile`, updateData, {
+      headers: this.getAuthHeaders()
+    }).subscribe({
+      next: (response) => {
+        const updatedUser = {
+          ...response.user,
+          joinDate: new Date(response.user.joinDate),
+        };
+        this.userProfile.set(updatedUser);
+        this.isEditing.set(false);
+        this.saving.set(false);
+        this.editForm = {};
+        this.showMessage('Profile updated successfully!', 'success');
+      },
+      error: (err) => {
+        console.error('Error updating profile:', err);
+        let errorMessage = 'Failed to update profile.';
+        
+        if (err.status === 401) {
+          errorMessage = 'Session expired. Please login again.';
+          this.handleAuthError();
+        } else if (err.status === 400) {
+          errorMessage = err.error?.message || 'Invalid data provided.';
+        } else if (err.status === 409) {
+          errorMessage = 'Username or email already exists.';
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
         }
-      });
-    */
-  }
-
-  triggerFileInput() {
-    const fileInput = document.querySelector(
-      'input[type="file"]'
-    ) as HTMLInputElement;
-    fileInput?.click();
-  }
-
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (this.userProfile()) {
-          const newProfile = { ...this.userProfile()! };
-          newProfile.avatar = e.target?.result as string;
-          this.userProfile.set(newProfile);
-          this.showMessage('Profile picture updated!', 'success');
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  logout() {
-    if (confirm('Are you sure you want to logout?')) {
-      this.showMessage('Logged out successfully!', 'success');
-      // Here you would typically navigate to login page or clear auth tokens
-      setTimeout(() => {
-        // Simulate logout redirect
-        console.log('Redirecting to login page...');
-      }, 1500);
-    }
-  }
-
-  formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
+        
+        this.showMessage(errorMessage, 'error');
+        this.saving.set(false);
+      }
     });
   }
 
-  private showMessage(text: string, type: 'success' | 'error') {
-    this.message.set(text);
+  deleteAccount() {
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+
+    if (!confirm('This will permanently delete all your data. Are you absolutely sure?')) {
+      return;
+    }
+
+    this.http.delete(`${baseUrl}/api/profile`, {
+      headers: this.getAuthHeaders()
+    }).subscribe({
+      next: () => {
+        this.showMessage('Account deleted successfully', 'success');
+        setTimeout(() => {
+          this.logout();
+        }, 2000);
+      },
+      error: (err) => {
+        console.error('Error deleting account:', err);
+        let errorMessage = 'Failed to delete account.';
+        
+        if (err.status === 401) {
+          errorMessage = 'Session expired. Please login again.';
+          this.handleAuthError();
+        } else if (err.error?.message) {
+          errorMessage = err.error.message;
+        }
+        
+        this.showMessage(errorMessage, 'error');
+      }
+    });
+  }
+
+  logout() {
+    this.authService.logout();
+    this.showMessage('Logged out successfully', 'success');
+  }
+
+  private handleAuthError() {
+    this.authService.logout();
+  }
+
+  private showMessage(msg: string, type: 'success' | 'error') {
+    this.message.set(msg);
     this.messageType.set(type);
+    
+    // Auto-hide message after 5 seconds
     setTimeout(() => {
       this.message.set('');
       this.messageType.set('');
-    }, 3000);
+    }, 5000);
+  }
+
+  formatDate(date: Date): string {
+    if (!date) return 'Unknown';
+    
+    try {
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(new Date(date));
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Unknown';
+    }
   }
 }
