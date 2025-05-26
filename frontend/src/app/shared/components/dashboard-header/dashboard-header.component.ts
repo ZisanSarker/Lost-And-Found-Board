@@ -1,6 +1,6 @@
-// dashboard-header.component.ts
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-header',
@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
         </div>
         <div class="flex gap-2">
           <button 
-            (click)="reportLostItem.emit()"
+            (click)="navigateTo('lost')"
             class="bg-gradient-to-r from-orange-600 to-red-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +26,7 @@ import { CommonModule } from '@angular/common';
             Report Lost Item
           </button>
           <button 
-            (click)="reportFoundItem.emit()"
+            (click)="navigateTo('found')"
             class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:border-orange-600 hover:text-orange-700 transition-all duration-300 flex items-center"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,6 +40,9 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class DashboardHeaderComponent {
-  @Output() reportLostItem = new EventEmitter<void>();
-  @Output() reportFoundItem = new EventEmitter<void>();
+  constructor(private router: Router) {}
+
+  navigateTo(type: 'lost' | 'found') {
+    this.router.navigate([`/repost/${type}`]);
+  }
 }
