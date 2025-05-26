@@ -80,7 +80,7 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         loadComponent: () =>
           import('./features/report/lost/lost.component').then(
-            (m) => m.LostComponent
+            (m) => m.LostPageComponent
           ),
       },
       {
