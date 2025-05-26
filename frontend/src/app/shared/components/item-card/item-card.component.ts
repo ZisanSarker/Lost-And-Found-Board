@@ -6,52 +6,63 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-orange-600 overflow-hidden">
-      <!-- Image block with fallback -->
-      <div class="h-48 bg-orange-100 flex items-center justify-center relative">
-        <img
-          [src]="image || 'assets/package_placeholder.jpg'"
+    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <!-- Image Container with Fixed Size -->
+      <div class="relative h-48 w-full overflow-hidden bg-gray-200">
+        <img 
+          [src]="image || 'assets/package_placeholder.jpg'" 
           [alt]="title"
-          class="w-full h-full object-contain"
           (error)="onImageError($event)"
+          class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
-
-        <!-- Status badge -->
-        <span
-          class="absolute top-2 right-2 px-2 py-1 text-xs font-semibold text-white rounded-full"
-          [class]="isLost ? 'bg-red-500' : 'bg-green-500'"
-        >
-          {{ isLost ? 'Lost' : 'Found' }}
-        </span>
+        
+        <!-- Status Badge -->
+        <div class="absolute top-3 right-3">
+          <span 
+            [class]="isLost ? 'bg-red-500 text-white' : 'bg-green-500 text-white'"
+            class="px-3 py-1 rounded-full text-sm font-semibold shadow-md"
+          >
+            {{ isLost ? 'Lost' : 'Found' }}
+          </span>
+        </div>
       </div>
-
+      
       <!-- Content -->
       <div class="p-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ title }}</h3>
-        <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ description }}</p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+          {{ title }}
+        </h3>
         
-        <!-- Location and date -->
-        <div class="flex items-center text-sm text-gray-500 mb-2">
-          <span class="mr-2">📍</span>
-          <span>{{ location }}</span>
+        <p class="text-gray-600 text-sm mb-3 line-clamp-2">
+          {{ description }}
+        </p>
+        
+        <!-- Location and Date -->
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📍</span>
+            <span class="truncate">{{ location }}</span>
+          </div>
+          
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">📅</span>
+            <span>{{ date }}</span>
+          </div>
         </div>
         
-        <div class="flex items-center text-sm text-gray-500 mb-4">
-          <span class="mr-2">📅</span>
-          <span>{{ date }}</span>
-        </div>
-
-        <!-- Actions -->
+        <!-- Action Buttons -->
         <div class="flex gap-2">
-          <button
+          <button 
             (click)="onViewDetails()"
-            class="flex-1 px-3 py-2 border border-orange-500 text-orange-500 rounded-md hover:bg-orange-50 transition-colors duration-200 text-sm font-medium"
+            class="flex-1 bg-white hover:bg-orange-50 text-orange-500 border-2 border-orange-500 text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200"
           >
             View Details
           </button>
-          <button
+          
+          <button 
             (click)="onContact()"
-            class="flex-1 px-3 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors duration-200 text-sm font-medium"
+            [class]="isLost ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'"
+            class="flex-1 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200"
           >
             Contact
           </button>

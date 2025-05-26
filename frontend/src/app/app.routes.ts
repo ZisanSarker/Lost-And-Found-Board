@@ -76,21 +76,13 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'report/lost',
+        path: 'repost/:type',
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import('./features/report/lost/lost.component').then(
-            (m) => m.LostPageComponent
+          import('./features/report/repost.component').then(
+            (m) => m.RepostPageComponent
           ),
-      },
-      {
-        path: 'report/found',
-        canActivate: [AuthGuard],
-        loadComponent: () =>
-          import('./features/report/found/found.component').then(
-            (m) => m.FoundComponent
-          ),
-      },
+      }
     ],
   },
   // catch all - redirect unauthenticated users to sign-in

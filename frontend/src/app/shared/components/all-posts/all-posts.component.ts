@@ -5,15 +5,32 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { ItemGridComponent } from '../item-grid/item-grid.component';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
+import { environment } from '../../../../environments/environment';
+const baseUrl = environment.apiBaseUrl;
 
+// Updated interface to match backend response
 interface Item {
   id: string;
   title: string;
   description: string;
+  category: string;
   location: string;
   date: string;
   type: 'lost' | 'found';
-  image?: string;
+  contactInfo: string;
+  userId: string;
+  image?: string; // For backward compatibility
+  imageUrl?: string; // Primary image field
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Backend API response interface
+interface ApiResponse {
+  success: boolean;
+  data: Item[];
+  count: number;
+  message: string;
 }
 
 @Component({
@@ -25,8 +42,13 @@ interface Item {
       <div class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h1 class="text-5xl font-bold text-orange-800 mb-4 animate-bounce">Find What Matters Most</h1>
-          <p class="text-orange-600 text-xl">Search through our database of lost and found items to find what you're looking for.</p>
+          <h1 class="text-5xl font-bold text-orange-800 mb-4 animate-bounce">
+            Find What Matters Most
+          </h1>
+          <p class="text-orange-600 text-xl">
+            Search through our database of lost and found items to find what
+            you're looking for.
+          </p>
         </div>
 
         <!-- Search Bar -->
@@ -39,14 +61,22 @@ interface Item {
           <div class="bg-white rounded-lg p-1 shadow-md">
             <button
               (click)="setActiveTab('lost')"
-              [class]="activeTab === 'lost' ? 'bg-orange-500 text-white' : 'text-orange-500'"
+              [class]="
+                activeTab === 'lost'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-orange-500'
+              "
               class="px-6 py-2 rounded-md font-medium transition-all duration-200"
             >
               Lost Items ({{ filteredLostItems.length }})
             </button>
             <button
               (click)="setActiveTab('found')"
-              [class]="activeTab === 'found' ? 'bg-orange-500 text-white' : 'text-orange-500'"
+              [class]="
+                activeTab === 'found'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-orange-500'
+              "
               class="px-6 py-2 rounded-md font-medium transition-all duration-200"
             >
               Found Items ({{ filteredFoundItems.length }})
@@ -54,15 +84,33 @@ interface Item {
           </div>
         </div>
 
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <p class="text-orange-600 mt-2">Loading items...</p>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="error && !isLoading" class="text-center py-8">
+          <p class="text-red-600">{{ error }}</p>
+          <button 
+            (click)="loadData()" 
+            class="mt-4 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+
         <!-- Items Grid -->
         <app-item-grid
+          *ngIf="!isLoading && !error"
           [items]="visibleItems"
           [loading]="isLoading"
-          [emptyMessage]="'No ' + activeTab + ' items found'"
+          [emptyMessage]="getEmptyMessage()"
         ></app-item-grid>
 
         <!-- See All / Show Less Button -->
-        <div class="text-center mt-6" *ngIf="showToggleButton">
+        <div class="text-center mt-6" *ngIf="showToggleButton && !isLoading && !error">
           <button
             (click)="toggleShowAll()"
             class="bg-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-orange-600 transition-all duration-200"
@@ -72,12 +120,13 @@ interface Item {
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class AllPostsComponent implements OnInit {
   activeTab: 'lost' | 'found' = 'lost';
   isLoading = true;
   showAll = false;
+  error: string = '';
 
   searchQuery = '';
   searchCategory = 'all';
@@ -95,68 +144,76 @@ export class AllPostsComponent implements OnInit {
   setActiveTab(tab: 'lost' | 'found') {
     if (this.activeTab !== tab) {
       this.activeTab = tab;
-      this.showAll = false; // Reset showAll when tab changes
+      this.showAll = false;
+      this.error = '';
+
+      // Load data only for the selected tab if not already loaded
+      if (tab === 'lost' && this.lostItems.length === 0) {
+        this.loadItemsByType('lost');
+      } else if (tab === 'found' && this.foundItems.length === 0) {
+        this.loadItemsByType('found');
+      }
     }
   }
 
   loadData() {
+    this.error = '';
     this.isLoading = true;
+    
+    // Load both types of items
+    forkJoin({
+      lost: this.http.get<ApiResponse>(`${baseUrl}/api/item/lost`),
+      found: this.http.get<ApiResponse>(`${baseUrl}/api/item/found`)
+    }).subscribe({
+      next: (responses) => {
+        // Handle lost items
+        if (responses.lost.success) {
+          this.lostItems = responses.lost.data;
+        } else {
+          console.error('Failed to load lost items:', responses.lost.message);
+        }
 
-    const lostItems$ = this.http.get<Item[]>('http://localhost:3000/lostItems');
-    const foundItems$ = this.http.get<Item[]>('http://localhost:3000/foundItems');
+        // Handle found items
+        if (responses.found.success) {
+          this.foundItems = responses.found.data;
+        } else {
+          console.error('Failed to load found items:', responses.found.message);
+        }
 
-    forkJoin([lostItems$, foundItems$]).subscribe({
-      next: ([lost, found]) => {
-        this.lostItems = lost || [];
-        this.foundItems = found || [];
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to load data from server:', err);
-        this.setFallbackData();
+        console.error('Failed to load items:', err);
+        this.error = 'Failed to load items. Please try again.';
         this.isLoading = false;
       }
     });
   }
 
-  setFallbackData() {
-    this.lostItems = [
-      {
-        id: 'lost-1',
-        title: 'Lost Wallet',
-        description: 'Brown leather wallet with ID and credit cards',
-        location: 'Downtown',
-        date: 'May 20, 2025',
-        type: 'lost'
-      },
-      {
-        id: 'lost-2',
-        title: 'Missing iPhone',
-        description: 'Blue iPhone 15 with cracked screen protector',
-        location: 'Coffee Shop',
-        date: 'May 21, 2025',
-        type: 'lost'
-      }
-    ];
+  loadItemsByType(type: 'lost' | 'found') {
+    this.isLoading = true;
+    this.error = '';
 
-    this.foundItems = [
-      {
-        id: 'found-1',
-        title: 'Found Keys',
-        description: 'Set of house keys with red keychain',
-        location: 'Central Park',
-        date: 'May 22, 2025',
-        type: 'found'
-      },
-      {
-        id: 'found-2',
-        title: 'Found Watch',
-        description: 'Silver watch with black leather strap',
-        location: 'Bus Station',
-        date: 'May 23, 2025',
-        type: 'found'
-      }
-    ];
+    this.http.get<ApiResponse>(`${baseUrl}/api/item/${type}`)
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            if (type === 'lost') {
+              this.lostItems = response.data;
+            } else {
+              this.foundItems = response.data;
+            }
+          } else {
+            this.error = response.message || `Failed to load ${type} items`;
+          }
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error(`Failed to load ${type} items:`, err);
+          this.error = `Failed to load ${type} items. Please try again.`;
+          this.isLoading = false;
+        }
+      });
   }
 
   get filteredLostItems(): Item[] {
@@ -168,22 +225,27 @@ export class AllPostsComponent implements OnInit {
   }
 
   get visibleItems(): Item[] {
-    const items = this.activeTab === 'lost' ? this.filteredLostItems : this.filteredFoundItems;
-    return this.showAll ? items : items.slice(0, 3); // show 3 items by default
+    const items = this.activeTab === 'lost' 
+      ? this.filteredLostItems 
+      : this.filteredFoundItems;
+    return this.showAll ? items : items.slice(0, 3);
   }
 
   get showToggleButton(): boolean {
-    const items = this.activeTab === 'lost' ? this.filteredLostItems : this.filteredFoundItems;
-    return items.length > 3; // Show toggle button only if more than 3 items
+    const items = this.activeTab === 'lost' 
+      ? this.filteredLostItems 
+      : this.filteredFoundItems;
+    return items.length > 3;
   }
 
   private filterItems(items: Item[]): Item[] {
-    return items.filter(item => {
+    return items.filter((item) => {
       const matchesQuery = !this.searchQuery ||
         item.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
       const matchesCategory = this.searchCategory === 'all' ||
+        item.category === this.searchCategory ||
         this.getItemCategory(item) === this.searchCategory;
 
       const matchesLocation = this.searchLocation === 'all' ||
@@ -194,25 +256,50 @@ export class AllPostsComponent implements OnInit {
   }
 
   private getItemCategory(item: Item): string {
+    // First check if item has explicit category
+    if (item.category && item.category !== 'other') {
+      return item.category;
+    }
+
+    // Fallback to text-based categorization
     const text = (item.title + ' ' + item.description).toLowerCase();
 
-    if (text.includes('phone') || text.includes('laptop') || text.includes('watch')) {
+    if (text.includes('phone') || text.includes('laptop') || text.includes('watch') || 
+        text.includes('tablet') || text.includes('headphones') || text.includes('charger')) {
       return 'electronics';
     }
-    if (text.includes('wallet') || text.includes('keys') || text.includes('ring')) {
-      return 'personal';
+    if (text.includes('wallet') || text.includes('keys') || text.includes('ring') ||
+        text.includes('jewelry') || text.includes('necklace') || text.includes('bracelet')) {
+      return 'accessories';
     }
-    if (text.includes('document') || text.includes('book') || text.includes('card')) {
+    if (text.includes('document') || text.includes('book') || text.includes('card') ||
+        text.includes('passport') || text.includes('license') || text.includes('certificate')) {
       return 'documents';
     }
+    if (text.includes('shirt') || text.includes('jacket') || text.includes('pants') ||
+        text.includes('dress') || text.includes('shoes') || text.includes('clothing')) {
+      return 'clothing';
+    }
+    if (text.includes('bag') || text.includes('backpack') || text.includes('purse') ||
+        text.includes('suitcase') || text.includes('briefcase')) {
+      return 'bags';
+    }
+    
     return 'other';
+  }
+
+  getEmptyMessage(): string {
+    if (this.searchQuery || this.searchCategory !== 'all' || this.searchLocation !== 'all') {
+      return `No ${this.activeTab} items found matching your search criteria`;
+    }
+    return `No ${this.activeTab} items found`;
   }
 
   onSearch(searchData: { query: string; category: string; location: string }) {
     this.searchQuery = searchData.query;
     this.searchCategory = searchData.category;
     this.searchLocation = searchData.location;
-    this.showAll = false; // Reset showAll on new search
+    this.showAll = false;
   }
 
   toggleShowAll() {

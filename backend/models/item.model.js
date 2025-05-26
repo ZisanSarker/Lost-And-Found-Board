@@ -52,8 +52,10 @@ const itemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    imageUrl: { type: String, required: false },
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     status: {

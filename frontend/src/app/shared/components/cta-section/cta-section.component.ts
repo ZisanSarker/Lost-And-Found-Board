@@ -179,12 +179,12 @@ export class CtaSectionComponent {
 
   postLostItem() {
     // Navigate to post lost item form
-    this.router.navigate(['/post-lost-item']);
+    this.router.navigate(['/repost/lost']);
   }
 
   postFoundItem() {
     // Navigate to post found item form
-    this.router.navigate(['/post-found-item']);
+    this.router.navigate(['/repost/found']);
   }
 
   showLearnMore() {
