@@ -1,63 +1,4 @@
 const Item = require('../models/item.model');
-
-// const mockLostItems = [
-//   {
-//     id: 'lost-1',
-//     title: 'Lost Wallet',
-//     description: 'Brown leather wallet with ID and credit cards',
-//     location: 'Downtown',
-//     date: 'May 20, 2025',
-//     type: 'lost',
-//     image: 'wallet.jpg'
-//   },
-//   {
-//     id: 'lost-2',
-//     title: 'Missing iPhone',
-//     description: 'Blue iPhone 15 with cracked screen protector',
-//     location: 'Coffee Shop',
-//     date: 'May 21, 2025',
-//     type: 'lost',
-//     image: 'iphone.jpg'
-//   },
-//   {
-//     id: 'lost-3',
-//     title: 'Lost Car Keys',
-//     description: 'Toyota car keys with blue remote',
-//     location: 'Shopping Mall',
-//     date: 'May 19, 2025',
-//     type: 'lost'
-//   }
-// ];
-
-// const mockFoundItems = [
-//   {
-//     id: 'found-1',
-//     title: 'Found Keys',
-//     description: 'Set of house keys with red keychain',
-//     location: 'Central Park',
-//     date: 'May 22, 2025',
-//     type: 'found',
-//     image: 'keys.jpg'
-//   },
-//   {
-//     id: 'found-2',
-//     title: 'Found Watch',
-//     description: 'Silver watch with black leather strap',
-//     location: 'Bus Station',
-//     date: 'May 23, 2025',
-//     type: 'found',
-//     image: 'watch.jpg'
-//   },
-//   {
-//     id: 'found-3',
-//     title: 'Found Sunglasses',
-//     description: 'Ray-Ban sunglasses in black case',
-//     location: 'Beach',
-//     date: 'May 24, 2025',
-//     type: 'found'
-//   }
-// ];
-
 exports.createItem = async (req, res) => {
   try {
     const {
@@ -72,7 +13,6 @@ exports.createItem = async (req, res) => {
       imageUrl
     } = req.body;
 
-    // Validate required fields
     if (!type || !title || !description || !category || !location || !date || !contactInfo || !userId) {
       return res.status(400).json({
         success: false,
@@ -80,7 +20,6 @@ exports.createItem = async (req, res) => {
       });
     }
 
-    // Validate type
     if (!['lost', 'found'].includes(type)) {
       return res.status(400).json({
         success: false,
@@ -88,7 +27,6 @@ exports.createItem = async (req, res) => {
       });
     }
 
-    // Validate imageUrl if provided (optional validation)
     if (imageUrl && typeof imageUrl !== 'string') {
       return res.status(400).json({
         success: false,
@@ -96,7 +34,6 @@ exports.createItem = async (req, res) => {
       });
     }
 
-    // Create item object with conditional imageUrl
     const itemData = {
       type,
       title,
@@ -108,12 +45,10 @@ exports.createItem = async (req, res) => {
       userId
     };
 
-    // Only add imageUrl if it's provided and not empty
     if (imageUrl && imageUrl.trim()) {
       itemData.imageUrl = imageUrl.trim();
     }
 
-    // Create new item
     const newItem = new Item(itemData);
 
     const savedItem = await newItem.save();
@@ -146,20 +81,17 @@ exports.createItem = async (req, res) => {
 exports.getItemsByType = async (req, res) => {
   try {
     const { type } = req.params;
-    
-    // Validate type parameter
+
     if (!['lost', 'found'].includes(type)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid type. Must be either "lost" or "found"'
       });
     }
-
-    // Query MongoDB for items by type, sorted by creation date (newest first)
     const items = await Item.find({ type: type })
       .sort({ createdAt: -1 })
-      .populate('userId', 'name email') // Optional: populate user details if needed
-      .lean(); // Use lean() for better performance when you don't need mongoose document methods
+      .populate('userId', 'name email')
+      .lean(); 
 
     // Transform data to match frontend expectations
     const transformedItems = items.map(item => ({
@@ -243,16 +175,71 @@ exports.getUserItems = async (req, res) => {
   }
 };
 
+exports.getItemById = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: 'Item ID is required' });
+  }
+
+  try {
+    const item = await Item.findById(id);
+
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Item retrieved successfully',
+      data: {
+        id: item._id.toString(),
+        title: item.title,
+        description: item.description,
+        category: item.category,
+        location: item.location,
+        date: item.date,
+        type: item.type,
+        contactInfo: item.contactInfo,
+        userId: item.userId,
+        imageUrl: item.imageUrl || null,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt
+      }
+    });
+
+  } catch (error) {
+    const isInvalidId = error.name === 'CastError';
+    res.status(isInvalidId ? 400 : 500).json({
+      success: false,
+      message: isInvalidId ? 'Invalid item ID format' : 'Server error while retrieving item',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+
 // Update item
 exports.updateItem = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
+    const id = req.params.id || req.body.id;
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Item ID is required'
+      });
+    }
 
-    // Remove fields that shouldn't be updated
-    delete updates._id;
-    delete updates.createdAt;
-    delete updates.updatedAt;
+    const {
+      title,
+      category,
+      description,
+      location,
+      date,
+      contactInfo,
+      type,
+      userId
+    } = req.body;
 
     const item = await Item.findById(id);
 
@@ -264,18 +251,23 @@ exports.updateItem = async (req, res) => {
     }
 
     // Check if user owns the item
-    if (updates.userId && item.userId !== updates.userId) {
+    if (userId && item.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'You can only update your own items'
       });
     }
 
-    const updatedItem = await Item.findByIdAndUpdate(
-      id,
-      updates,
-      { new: true, runValidators: true }
-    );
+    // Update allowed fields only
+    if (title !== undefined) item.title = title;
+    if (category !== undefined) item.category = category;
+    if (description !== undefined) item.description = description;
+    if (location !== undefined) item.location = location;
+    if (date !== undefined) item.date = date;
+    if (contactInfo !== undefined) item.contactInfo = contactInfo;
+    if (type !== undefined) item.type = type;
+
+    const updatedItem = await item.save();
 
     const transformedItem = {
       id: updatedItem._id.toString(),
@@ -288,7 +280,6 @@ exports.updateItem = async (req, res) => {
       contactInfo: updatedItem.contactInfo,
       userId: updatedItem.userId,
       imageUrl: updatedItem.imageUrl,
-      status: updatedItem.status || 'active',
       createdAt: updatedItem.createdAt,
       updatedAt: updatedItem.updatedAt
     };
@@ -322,6 +313,9 @@ exports.updateItem = async (req, res) => {
     });
   }
 };
+
+
+
 
 // Delete item
 exports.deleteItem = async (req, res) => {
