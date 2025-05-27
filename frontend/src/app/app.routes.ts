@@ -82,6 +82,14 @@ export const routes: Routes = [
           import('./features/report/repost.component').then(
             (m) => m.RepostPageComponent
           ),
+      },
+      {
+        path: 'edit-item',
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./pages/edit-item/edit-item.component').then(
+            (m) => m.EditItemComponent
+          ),
       }
     ],
   },

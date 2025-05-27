@@ -18,7 +18,7 @@ export interface Listing {
   contactInfo: string;
   userId: string;
   imageUrl?: string;
-  image?: string; // For backward compatibility
+  image?: string;
   status?: 'active' | 'resolved';
   createdAt: string;
   updatedAt: string;
@@ -373,7 +373,7 @@ export interface Listing {
   `,
 })
 export class MyListingsComponent implements OnInit, OnDestroy {
-  @Input() userId: string = ''; // Current user ID - passed from parent component
+  @Input() userId: string = '';
 
   activeFilter: string = 'all';
   searchQuery: string = '';
@@ -386,19 +386,17 @@ export class MyListingsComponent implements OnInit, OnDestroy {
     { label: 'All', value: 'all' },
     { label: 'Lost', value: 'lost' },
     { label: 'Found', value: 'found' },
-    { label: 'Resolved', value: 'resolved' },
   ];
 
   myListings: Listing[] = [];
   
-  // API Configuration
   private readonly API_BASE_URL = environment.apiBaseUrl;
   private readonly ITEMS_ENDPOINT = `${this.API_BASE_URL}/api/item`;
 
   constructor(
     private http: HttpClient,
     private router: Router,
-    private authService: AuthService // Inject AuthService
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -551,16 +549,13 @@ export class MyListingsComponent implements OnInit, OnDestroy {
 
   onEditListing(listing: Listing): void {
     this.activeDropdown = null;
-    // Navigate to edit page
     this.router.navigate(['/edit-item', listing.id]);
   }
 
   onToggleStatus(listing: Listing): void {
     this.activeDropdown = null;
-    const newStatus = listing.status === 'resolved' ? 'active' : 'resolved';
     
     const updateData = {
-      status: newStatus,
       userId: this.userId
     };
 
@@ -581,7 +576,7 @@ export class MyListingsComponent implements OnInit, OnDestroy {
           // Update the local listing
           const index = this.myListings.findIndex(item => item.id === listing.id);
           if (index !== -1) {
-            this.myListings[index] = { ...this.myListings[index], status: newStatus };
+            this.myListings[index] = { ...this.myListings[index] };
           }
         } else {
           alert('Failed to update status: ' + response.message);
