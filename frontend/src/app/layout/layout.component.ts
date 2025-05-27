@@ -7,8 +7,12 @@ import { FooterComponent } from '../shared/footer/footer.component';
   selector: 'app-layout',
   standalone: true,
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
-  templateUrl: './layout.component.html',
+  template: `
+    <app-header></app-header>
+    <main class="min-h-screen">
+      <router-outlet></router-outlet>
+    </main>
+    <app-footer></app-footer>
+  `,
 })
-export class LayoutComponent {
-
-}
+export class LayoutComponent {}

@@ -15,8 +15,6 @@ import { AuthService } from '../../features/auth/auth.service'; // Add this impo
 
 import { ProfileSidebarComponent } from '../../shared/components/profile-sidebar/profile-sidebar.component';
 import { NotificationSidebarComponent } from '../../shared/components/notification-sidebar/notification-sidebar.component';
-import { MessageTabComponent } from '../../shared/components/message-tab/message-tab.component';
-import { NotificationTabComponent } from '../../shared/components/notification-tab/notification-tab.component';
 import { MyListingsComponent } from '../../shared/components/my-listings/my-listings.component';
 import { DashboardHeaderComponent } from '../../shared/components/dashboard-header/dashboard-header.component';
 
@@ -30,8 +28,6 @@ import { DashboardHeaderComponent } from '../../shared/components/dashboard-head
     HttpClientModule,
     ProfileSidebarComponent,
     NotificationSidebarComponent,
-    MessageTabComponent,
-    NotificationTabComponent,
     MyListingsComponent,
     DashboardHeaderComponent,
   ],
@@ -111,20 +107,6 @@ import { DashboardHeaderComponent } from '../../shared/components/dashboard-head
               >
                 <p class="text-yellow-700">Unable to load user information. Please try logging in again.</p>
               </div>
-
-              <app-message-tab
-                *ngIf="activeTab === 'messages'"
-                [activeTab]="activeTab"
-                [messages]="messages"
-              >
-              </app-message-tab>
-
-              <app-notification-tab
-                *ngIf="activeTab === 'notifications'"
-                [activeTab]="activeTab"
-                [notifications]="notifications"
-              >
-              </app-notification-tab>
             </ng-container>
           </div>
         </div>
