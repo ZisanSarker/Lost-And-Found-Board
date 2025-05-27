@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../auth/auth.service';
+import { CloudinaryService } from '../report/cloudinary.service';
 
 const baseUrl = environment.apiBaseUrl;
 
@@ -107,18 +109,62 @@ interface ApiResponse {
           <div class="relative p-8 md:p-12">
             <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
               <!-- Avatar Section (Static - No Upload Functionality) -->
+              <!-- Avatar Section with Upload -->
               <div class="relative group">
                 <div class="relative">
                   <div
                     class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-white/20 to-white/5 p-1 backdrop-blur-sm"
                   >
                     <img
-                      [src]="userProfile()!.avatar"
+                      [src]="
+                        selectedAvatar?.preview ||
+                        editForm.avatar ||
+                        userProfile()!.avatar
+                      "
                       [alt]="userProfile()!.username"
                       class="w-full h-full rounded-full object-cover border-4 border-white/30 shadow-2xl"
                     />
                   </div>
+
+                  <!-- Upload overlay when editing -->
+                  <div
+                    *ngIf="isEditing()"
+                    class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                    (click)="fileInput.click()"
+                  >
+                    <div *ngIf="!isUploadingAvatar()" class="text-center">
+                      <svg
+                        class="w-8 h-8 text-white mx-auto mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        ></path>
+                      </svg>
+                      <span class="text-white text-sm font-medium"
+                        >Change Avatar</span
+                      >
+                    </div>
+                    <div
+                      *ngIf="isUploadingAvatar()"
+                      class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"
+                    ></div>
+                  </div>
                 </div>
+
+                <!-- Hidden file input -->
+                <input
+                  #fileInput
+                  type="file"
+                  class="hidden"
+                  accept="image/*"
+                  (change)="onAvatarSelected($event)"
+                />
 
                 <!-- Verification Badge -->
                 <div
@@ -562,6 +608,7 @@ export class ProfileComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private toastr = inject(ToastrService);
+  private cloudinaryService = inject(CloudinaryService);
 
   // Signals for state management
   loading = signal(false);
@@ -570,11 +617,68 @@ export class ProfileComponent implements OnInit {
   isEditing = signal(false);
   userProfile = signal<UserProfile | null>(null);
   showDeleteModal = signal(false);
+  selectedAvatar: { file: File; preview: string } | null = null;
+  isUploadingAvatar = signal(false);
 
-  editForm: Partial<UserProfile> = {};
+  editForm: Partial<UserProfile & { avatar?: string }> = {};
 
   ngOnInit() {
     this.loadProfile();
+  }
+
+  onAvatarSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!this.cloudinaryService.isValidImageFile(file)) {
+      this.toastr.error(
+        'Please select a valid image file (JPEG, PNG, GIF) under 5MB',
+        'Invalid File'
+      );
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.selectedAvatar = {
+        file: file,
+        preview: e.target.result,
+      };
+      this.uploadAvatar();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private async uploadAvatar(): Promise<void> {
+    if (!this.selectedAvatar) return;
+
+    this.isUploadingAvatar.set(true);
+
+    try {
+      const response = await firstValueFrom(
+        this.cloudinaryService.uploadImage(this.selectedAvatar.file)
+      );
+
+      // Update the edit form with new avatar URL
+      this.editForm.avatar = response.secure_url;
+      this.toastr.success('Avatar uploaded successfully!', 'Success');
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      this.toastr.error(
+        'Failed to upload avatar. Please try again.',
+        'Upload Error'
+      );
+      this.removeAvatar();
+    } finally {
+      this.isUploadingAvatar.set(false);
+    }
+  }
+
+  removeAvatar(): void {
+    this.selectedAvatar = null;
+    if (this.editForm.avatar) {
+      delete this.editForm.avatar;
+    }
   }
 
   private getAuthHeaders(): HttpHeaders {
@@ -634,6 +738,7 @@ export class ProfileComponent implements OnInit {
         phone: profile.phone,
         location: profile.location,
         bio: profile.bio,
+        avatar: profile.avatar,
       };
       this.isEditing.set(true);
     }
@@ -642,6 +747,7 @@ export class ProfileComponent implements OnInit {
   cancelEditing() {
     this.isEditing.set(false);
     this.editForm = {};
+    this.selectedAvatar = null;
   }
 
   saveProfile() {
@@ -659,6 +765,7 @@ export class ProfileComponent implements OnInit {
       phone: this.editForm.phone?.trim() || '',
       location: this.editForm.location?.trim() || '',
       bio: this.editForm.bio?.trim() || '',
+      avatar: this.editForm.avatar || this.userProfile()!.avatar,
     };
 
     this.http
