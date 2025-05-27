@@ -2,13 +2,6 @@ const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
   try {
-    // ✅ Case 1: OAuth via Passport.js
-    if (req.isAuthenticated && req.isAuthenticated()) {
-      req.userId = req.user._id || req.user.id;
-      return next();
-    }
-
-    // ✅ Case 2: JWT
     const accessToken = req.cookies.accessToken;
     const authHeader = req.headers.authorization;
     const headerToken = authHeader?.split(' ')[1];

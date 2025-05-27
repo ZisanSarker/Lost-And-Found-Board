@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-item-card',
@@ -80,6 +81,8 @@ export class ItemCardComponent {
   @Input() type!: 'lost' | 'found';
   @Input() image?: string;
 
+  constructor(private router: Router) {}
+
   get isLost(): boolean {
     return this.type === 'lost';
   }
@@ -90,10 +93,18 @@ export class ItemCardComponent {
   }
 
   onViewDetails() {
-    alert(`Viewing details for: ${this.title}`);
+    if (this.id) {
+      this.router.navigate(['/item-detail', this.id]);
+    } else {
+      console.warn('No ID provided for item card navigation');
+    }
   }
 
   onContact() {
-    alert(`Contact for: ${this.title}`);
+    if (this.id) {
+      this.router.navigate(['/item-detail', this.id]);
+    } else {
+      console.warn('No ID provided for item card navigation');
+    }
   }
 }

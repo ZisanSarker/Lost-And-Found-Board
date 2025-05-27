@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { Location } from '@angular/common';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../features/auth/auth.service';
 
@@ -21,6 +22,15 @@ export interface Listing {
   status?: 'active' | 'resolved';
   createdAt: string;
   updatedAt: string;
+  posterName?: string;
+}
+
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  username?: string;
 }
 
 @Component({
@@ -39,8 +49,29 @@ export interface Listing {
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
             </svg>
-            Back to Listings
+            Back
           </button>
+        </div>
+
+        <!-- Toast Message -->
+        <div *ngIf="showToast" 
+             class="fixed top-4 right-4 z-50 transform transition-all duration-300 ease-in-out"
+             [class.translate-x-0]="showToast"
+             [class.translate-x-full]="!showToast">
+          <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-lg p-4 flex items-center">
+            <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-gray-900">Success!</p>
+              <p class="text-sm text-gray-600">{{ toastMessage }}</p>
+            </div>
+            <button (click)="hideToast()" class="ml-4 text-gray-400 hover:text-gray-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -134,10 +165,61 @@ export interface Listing {
                   />
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg"></div>
                 </div>
+
+                <!-- Additional Details Card -->
+                <div class="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-100">
+                  <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Additional Information
+                  </h3>
+                  
+                  <div class="space-y-3 text-sm">
+                    <!-- <div class="flex justify-between items-center">
+                      <span class="text-gray-600">Item ID:</span>
+                      <span class="text-gray-800 font-mono bg-gray-100 px-2 py-1 rounded">{{ item.id.slice(-8) }}</span>
+                    </div> -->
+                    
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">Days since {{ item.type === 'lost' ? 'lost' : 'found' }}:</span>
+                      <span class="text-gray-800 font-semibold">{{ getDaysSince(item.date) }} days</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">Last updated:</span>
+                      <span class="text-gray-800">{{ getRelativeTime(item.updatedAt) }}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">Listing age:</span>
+                      <span class="text-gray-800">{{ getRelativeTime(item.createdAt) }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-600">Priority:</span>
+                      <span [class]="getPriorityClass()" class="px-2 py-1 rounded-full text-xs font-semibold">
+                        {{ getPriorityLevel() }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Details Section -->
               <div class="w-full lg:w-1/2 space-y-6">
+                <!-- Posted By Section -->
+                <div class="bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-lg border border-purple-200">
+                  <div class="flex items-center mb-2">
+                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <span class="font-semibold text-gray-800">Posted by</span>
+                  </div>
+                  <p class="text-gray-700 font-medium">{{ getPosterName() == "undefined" ? getPosterName():"" }}</p>
+                  <p class="text-gray-600 text-sm mt-1">{{ isOwner ? 'You' : 'Community Member' }}</p>
+                </div>
+
                 <!-- Description -->
                 <div>
                   <h2 class="text-xl font-semibold text-gray-800 mb-3 flex items-center">
@@ -167,7 +249,7 @@ export interface Listing {
                   <div class="bg-gradient-to-r from-orange-100 to-orange-200 p-4 rounded-lg">
                     <div class="flex items-center mb-2">
                       <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v8a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1h3z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                       </svg>
                       <span class="font-semibold text-gray-800">Category</span>
                     </div>
@@ -181,17 +263,17 @@ export interface Listing {
                       </svg>
                       <span class="font-semibold text-gray-800">Date {{ item.type === 'lost' ? 'Lost' : 'Found' }}</span>
                     </div>
-                    <p class="text-gray-700">{{ item.date }}</p>
+                    <p class="text-gray-700">{{ formatDisplayDate(item.date) }}</p>
                   </div>
 
                   <div class="bg-gradient-to-r from-orange-100 to-orange-200 p-4 rounded-lg">
                     <div class="flex items-center mb-2">
                       <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
-                      <span class="font-semibold text-gray-800">Status</span>
+                      <span class="font-semibold text-gray-800">Urgency Level</span>
                     </div>
-                    <p class="text-gray-700 capitalize">{{ item.status || 'Active' }}</p>
+                    <p class="text-gray-700">{{ getUrgencyLevel() }}</p>
                   </div>
                 </div>
 
@@ -300,8 +382,11 @@ export class ItemDetailsComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   isOwner: boolean = false;
   currentUserId: string = '';
+  currentUser: User | null = null;
   showOwnerActions: boolean = false;
   showDeleteModal: boolean = false;
+  showToast: boolean = false;
+  toastMessage: string = '';
   private subscriptions: Subscription = new Subscription();
 
   private readonly API_BASE_URL = environment.apiBaseUrl;
@@ -311,7 +396,8 @@ export class ItemDetailsComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -320,11 +406,13 @@ export class ItemDetailsComponent implements OnInit, OnDestroy {
       next: (user) => {
         if (user && user.id) {
           this.currentUserId = user.id;
+          this.currentUser = user;
           this.checkOwnership();
         } else {
           const currentUser = this.authService.getUser();
           if (currentUser && currentUser.id) {
             this.currentUserId = currentUser.id;
+            this.currentUser = currentUser;
             this.checkOwnership();
           }
         }
@@ -395,27 +483,214 @@ export class ItemDetailsComponent implements OnInit, OnDestroy {
           this.errorMessage = 'Session expired. Please log in again.';
           this.authService.logout();
         } else {
-          this.errorMessage = error.error?.message || 'Failed to load item details. Please try again.';
+          this.errorMessage = error.error?.message || 'Failed to load item details';
         }
         this.isLoading = false;
-      },
+      }
     });
 
     this.subscriptions.add(subscription);
   }
 
-  checkOwnership(): void {
+  private checkOwnership(): void {
     if (this.item && this.currentUserId) {
       this.isOwner = this.item.userId === this.currentUserId;
     }
   }
 
   goBack(): void {
-    if (this.showOwnerActions) {
-      this.router.navigate(['/my-listings']);
+    this.location.back();
+  }
+
+  formatDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
+  }
+
+  formatDisplayDate(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
+  }
+
+  getTypeBadgeClass(type: string): string {
+    return type === 'lost' 
+      ? 'bg-red-600 text-white' 
+      : 'bg-green-600 text-white';
+  }
+
+  getPosterName(): string {
+    if (this.item?.posterName) {
+      return this.item.posterName;
+    }
+    
+    if (this.isOwner && this.currentUser) {
+      return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+    }
+    
+    return 'Anonymous User';
+  }
+
+  getDaysSince(dateString: string): number {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now.getTime() - date.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  getRelativeTime(dateString: string): string {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = now.getTime() - date.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+      const diffMinutes = Math.floor(diffTime / (1000 * 60));
+
+      if (diffDays > 0) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      } else if (diffHours > 0) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      } else if (diffMinutes > 0) {
+        return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+      } else {
+        return 'Just now';
+      }
+    } catch (error) {
+      return 'Unknown';
+    }
+  }
+
+  getPriorityLevel(): string {
+    if (!this.item) return 'Normal';
+    
+    const daysSince = this.getDaysSince(this.item.date);
+    const type = this.item.type;
+    
+    if (type === 'lost') {
+      if (daysSince <= 1) return 'Critical';
+      if (daysSince <= 7) return 'High';
+      if (daysSince <= 30) return 'Medium';
+      return 'Low';
     } else {
-      // Go back to previous page or home
-      window.history.back();
+      if (daysSince <= 3) return 'High';
+      if (daysSince <= 14) return 'Medium';
+      return 'Low';
+    }
+  }
+
+  getPriorityClass(): string {
+    const priority = this.getPriorityLevel();
+    const baseClasses = 'px-2 py-1 rounded-full text-xs font-semibold';
+    
+    switch (priority) {
+      case 'Critical':
+        return `${baseClasses} bg-red-600 text-white`;
+      case 'High':
+        return `${baseClasses} bg-orange-500 text-white`;
+      case 'Medium':
+        return `${baseClasses} bg-yellow-500 text-white`;
+      case 'Low':
+        return `${baseClasses} bg-green-500 text-white`;
+      default:
+        return `${baseClasses} bg-gray-500 text-white`;
+    }
+  }
+
+  getUrgencyLevel(): string {
+    if (!this.item) return 'Normal';
+    
+    const daysSince = this.getDaysSince(this.item.date);
+    const category = this.item.category?.toLowerCase() || '';
+    
+    // High urgency categories
+    const highUrgencyCategories = ['wallet', 'keys', 'phone', 'documents', 'id', 'passport'];
+    const isHighUrgencyCategory = highUrgencyCategories.some(cat => category.includes(cat));
+    
+    if (this.item.type === 'lost') {
+      if (daysSince <= 1 && isHighUrgencyCategory) return 'Critical - Act Fast!';
+      if (daysSince <= 3 && isHighUrgencyCategory) return 'Very High';
+      if (daysSince <= 1) return 'High';
+      if (daysSince <= 7) return 'Medium-High';
+      if (daysSince <= 30) return 'Medium';
+      return 'Low';
+    } else {
+      if (isHighUrgencyCategory) return 'High - Important Item';
+      if (daysSince <= 7) return 'Medium';
+      return 'Low';
+    }
+  }
+
+  copyContact(): void {
+    if (this.item?.contactInfo) {
+      navigator.clipboard.writeText(this.item.contactInfo).then(() => {
+        this.showToastMessage('Contact information copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy contact info:', err);
+        this.showToastMessage('Failed to copy contact information');
+      });
+    }
+  }
+
+  reportItem(): void {
+    if (!this.item) return;
+    
+    // In a real application, this would open a report modal or navigate to a report page
+    const confirmed = confirm('Are you sure you want to report this item? This will notify the administrators.');
+    
+    if (confirmed) {
+      // Here you would typically make an API call to report the item
+      this.showToastMessage('Item has been reported. Thank you for helping keep our community safe.');
+    }
+  }
+
+  shareItem(): void {
+    if (!this.item) return;
+    
+    const itemUrl = window.location.href;
+    const shareText = `Check out this ${this.item.type} item: ${this.item.title}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: this.item.title,
+        text: shareText,
+        url: itemUrl,
+      }).catch(err => console.log('Error sharing:', err));
+    } else {
+      // Fallback: copy URL to clipboard
+      navigator.clipboard.writeText(itemUrl).then(() => {
+        this.showToastMessage('Item link copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy URL:', err);
+        this.showToastMessage('Failed to copy link');
+      });
+    }
+  }
+
+  editItem(): void {
+    if (this.item) {
+      this.router.navigate(['/edit-item', this.item.id]);
     }
   }
 
@@ -427,115 +702,59 @@ export class ItemDetailsComponent implements OnInit, OnDestroy {
     this.showDeleteModal = false;
   }
 
-  editItem(): void {
-    if (this.item) {
-      this.router.navigate(['/edit-item', this.item.id]);
-    }
-  }
-
   deleteItem(): void {
     if (!this.item) return;
 
-    this.showDeleteModal = false;
-
-    const deleteData = {
-      userId: this.currentUserId
-    };
-
     const token = this.authService.getToken();
-    const headers: any = {};
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (!token) {
+      this.errorMessage = 'Authentication required';
+      return;
     }
 
-    const subscription = this.http.request<{
+    const headers = {
+      'Authorization': `Bearer ${token}`
+    };
+
+    const subscription = this.http.delete<{
       success: boolean;
-      message: string;
-    }>('DELETE', `${this.ITEMS_ENDPOINT}/${this.item.id}`, {
-      body: deleteData,
-      headers
-    }).subscribe({
+      message?: string;
+    }>(`${this.ITEMS_ENDPOINT}/${this.item.id}`, { headers }).subscribe({
       next: (response) => {
         if (response.success) {
-          alert('Item deleted successfully');
-          if (this.showOwnerActions) {
+          this.showDeleteModal = false;
+          this.showToastMessage('Item deleted successfully');
+          
+          // Navigate back after a short delay
+          setTimeout(() => {
             this.router.navigate(['/my-listings']);
-          } else {
-            this.goBack();
-          }
+          }, 1500);
         } else {
-          alert('Failed to delete item: ' + response.message);
+          this.errorMessage = response.message || 'Failed to delete item';
+          this.showDeleteModal = false;
         }
       },
       error: (error) => {
         console.error('Error deleting item:', error);
-        if (error.status === 401) {
-          this.authService.logout();
-        } else {
-          alert('Failed to delete item. Please try again.');
-        }
+        this.errorMessage = error.error?.message || 'Failed to delete item';
+        this.showDeleteModal = false;
       }
     });
 
     this.subscriptions.add(subscription);
   }
 
-  copyContact(): void {
-    if (this.item?.contactInfo) {
-      navigator.clipboard.writeText(this.item.contactInfo).then(() => {
-        alert('Contact information copied to clipboard!');
-      }).catch(() => {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = this.item!.contactInfo;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert('Contact information copied to clipboard!');
-      });
-    }
+  showToastMessage(message: string): void {
+    this.toastMessage = message;
+    this.showToast = true;
+    
+    // Auto-hide toast after 3 seconds
+    setTimeout(() => {
+      this.hideToast();
+    }, 3000);
   }
 
-  shareItem(): void {
-    if (this.item) {
-      const shareData = {
-        title: this.item.title,
-        text: `${this.item.type === 'lost' ? 'Lost' : 'Found'}: ${this.item.title}`,
-        url: window.location.href
-      };
-
-      if (navigator.share) {
-        navigator.share(shareData).catch(console.error);
-      } else {
-        // Fallback - copy URL to clipboard
-        navigator.clipboard.writeText(window.location.href).then(() => {
-          alert('Item URL copied to clipboard!');
-        });
-      }
-    }
-  }
-
-  reportItem(): void {
-    alert('Report functionality would be implemented here. This would typically open a modal or redirect to a report form.');
-  }
-
-  getTypeBadgeClass(type: string): string {
-    if (type === 'lost') {
-      return 'bg-red-600 bg-opacity-80';
-    }
-    return 'bg-green-600 bg-opacity-80';
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  hideToast(): void {
+    this.showToast = false;
+    this.toastMessage = '';
   }
 }

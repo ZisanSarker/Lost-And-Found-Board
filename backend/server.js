@@ -55,7 +55,7 @@ app.use(
 
 // ───────────── Routes ─────────────
 app.use('/api/auth', authRoutes);
-app.use('/api/profile', profileRoutes);
+app.use('/api/profile', authMiddleware , profileRoutes);
 app.use('/api/item', itemRoutes);
 
 app.get('/', (req, res) => {
