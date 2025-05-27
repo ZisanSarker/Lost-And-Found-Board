@@ -69,6 +69,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'help-support',
+        loadComponent: () =>
+          import('./pages/help-support/help-support.component').then(
+            (m) => m.HelpSupportComponent
+          ),
+      },
+      {
         path: 'contact/:id',
         loadComponent: () =>
           import('./pages/contact/contact.component').then(
