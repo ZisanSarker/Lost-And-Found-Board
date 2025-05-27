@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://your-live-domain.com/api'
+  apiBaseUrl: 'https://lost-and-found-board.onrender.com'
 };
