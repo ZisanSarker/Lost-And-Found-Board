@@ -162,8 +162,8 @@ export class AllPostsComponent implements OnInit {
     
     // Load both types of items
     forkJoin({
-      lost: this.http.get<ApiResponse>(`${baseUrl}/api/item/lost`),
-      found: this.http.get<ApiResponse>(`${baseUrl}/api/item/found`)
+      lost: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/lost`),
+      found: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/found`)
     }).subscribe({
       next: (responses) => {
         // Handle lost items
@@ -194,7 +194,7 @@ export class AllPostsComponent implements OnInit {
     this.isLoading = true;
     this.error = '';
 
-    this.http.get<ApiResponse>(`${baseUrl}/api/item/${type}`)
+    this.http.get<ApiResponse>(`${baseUrl}/api/item/type/${type}`)
       .subscribe({
         next: (response) => {
           if (response.success) {

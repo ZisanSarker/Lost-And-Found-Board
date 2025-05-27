@@ -36,7 +36,7 @@ import { DashboardHeaderComponent } from '../../shared/components/dashboard-head
     DashboardHeaderComponent,
   ],
   template: `
-    <div class="bg-orange-100 min-h-screen">
+    <div class="bg-orange-50 min-h-screen">
       <div class="container mx-auto px-4 py-12">
         <!-- Page Header -->
         <app-dashboard-header

@@ -90,6 +90,14 @@ export const routes: Routes = [
           import('./pages/edit-item/edit-item.component').then(
             (m) => m.EditItemComponent
           ),
+      },
+      {
+        path: 'item-detail/:id',
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./pages/item-datail/item-datail.component').then(
+            (m) => m.ItemDetailsComponent
+          ),
       }
     ],
   },

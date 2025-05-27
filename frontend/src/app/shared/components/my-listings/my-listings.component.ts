@@ -138,9 +138,7 @@ export interface Listing {
           "
           class="text-center py-8"
         >
-          <p class="text-gray-500">
-            No listings found matching your search.
-          </p>
+          <p class="text-gray-500">No listings found matching your search.</p>
         </div>
 
         <!-- Listings -->
@@ -157,7 +155,11 @@ export interface Listing {
             <div class="flex flex-col md:flex-row">
               <div class="w-full md:w-48 h-48 bg-gray-200 relative group">
                 <img
-                  [src]="listing.imageUrl || listing.image || 'assets/package_placeholder.jpg'"
+                  [src]="
+                    listing.imageUrl ||
+                    listing.image ||
+                    'assets/package_placeholder.jpg'
+                  "
                   [alt]="listing.title"
                   width="300"
                   height="200"
@@ -179,9 +181,7 @@ export interface Listing {
                     >
                       Resolved
                     </span>
-                    <h4
-                      class="text-lg font-medium mt-2 text-gray-800"
-                    >
+                    <h4 class="text-lg font-medium mt-2 text-gray-800">
                       {{ listing.title }}
                     </h4>
                     <p class="text-gray-600 mt-1">
@@ -249,7 +249,7 @@ export interface Listing {
                         </svg>
                         Edit
                       </button>
-                      
+
                       <hr class="border-gray-200 dark:border-gray-700" />
                       <button
                         (click)="onDeleteListing(listing)"
@@ -273,9 +273,7 @@ export interface Listing {
                     </div>
                   </div>
                 </div>
-                <div
-                  class="flex flex-wrap gap-4 mt-4 text-sm text-gray-800"
-                >
+                <div class="flex flex-wrap gap-4 mt-4 text-sm text-gray-800">
                   <div class="flex items-center">
                     <svg
                       class="w-4 h-4 mr-1 text-orange-600"
@@ -367,7 +365,7 @@ export class MyListingsComponent implements OnInit, OnDestroy {
   ];
 
   myListings: Listing[] = [];
-  
+
   private readonly API_BASE_URL = environment.apiBaseUrl;
   private readonly ITEMS_ENDPOINT = `${this.API_BASE_URL}/api/item`;
 
@@ -398,7 +396,7 @@ export class MyListingsComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error getting user information:', error);
         this.errorMessage = 'Failed to get user information.';
-      }
+      },
     });
 
     this.subscriptions.add(userSubscription);
@@ -425,36 +423,40 @@ export class MyListingsComponent implements OnInit, OnDestroy {
     // Add authorization header with token
     const token = this.authService.getToken();
     const headers: any = {};
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const subscription = this.http.get<{
-      success: boolean;
-      data: Listing[];
-      count: number;
-      message?: string;
-    }>(`${this.ITEMS_ENDPOINT}/user/${this.userId}`, { headers }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.myListings = response.data || [];
-        } else {
-          this.errorMessage = response.message || 'Failed to load listings';
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading user listings:', error);
-        if (error.status === 401) {
-          this.errorMessage = 'Session expired. Please log in again.';
-          this.authService.logout();
-        } else {
-          this.errorMessage = error.error?.message || 'Failed to load listings. Please try again.';
-        }
-        this.isLoading = false;
-      },
-    });
+    const subscription = this.http
+      .get<{
+        success: boolean;
+        data: Listing[];
+        count: number;
+        message?: string;
+      }>(`${this.ITEMS_ENDPOINT}/user/${this.userId}`, { headers })
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.myListings = response.data || [];
+          } else {
+            this.errorMessage = response.message || 'Failed to load listings';
+          }
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading user listings:', error);
+          if (error.status === 401) {
+            this.errorMessage = 'Session expired. Please log in again.';
+            this.authService.logout();
+          } else {
+            this.errorMessage =
+              error.error?.message ||
+              'Failed to load listings. Please try again.';
+          }
+          this.isLoading = false;
+        },
+      });
 
     this.subscriptions.add(subscription);
   }
@@ -522,7 +524,9 @@ export class MyListingsComponent implements OnInit, OnDestroy {
   onViewListing(listing: Listing): void {
     this.activeDropdown = null;
     // Navigate to item details page
-    this.router.navigate(['/item', listing.id]);
+    this.router.navigate(['/item-detail', listing.id], {
+      queryParams: { from: 'my-listings' },
+    });
   }
 
   onEditListing(listing: Listing): void {
@@ -532,89 +536,101 @@ export class MyListingsComponent implements OnInit, OnDestroy {
 
   onToggleStatus(listing: Listing): void {
     this.activeDropdown = null;
-    
+
     const updateData = {
-      userId: this.userId
+      userId: this.userId,
     };
 
     const token = this.authService.getToken();
     const headers: any = {};
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const subscription = this.http.put<{
-      success: boolean;
-      message: string;
-      data: Listing;
-    }>(`${this.ITEMS_ENDPOINT}/${listing.id}`, updateData, { headers }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Update the local listing
-          const index = this.myListings.findIndex(item => item.id === listing.id);
-          if (index !== -1) {
-            this.myListings[index] = { ...this.myListings[index] };
+    const subscription = this.http
+      .put<{
+        success: boolean;
+        message: string;
+        data: Listing;
+      }>(`${this.ITEMS_ENDPOINT}/${listing.id}`, updateData, { headers })
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Update the local listing
+            const index = this.myListings.findIndex(
+              (item) => item.id === listing.id
+            );
+            if (index !== -1) {
+              this.myListings[index] = { ...this.myListings[index] };
+            }
+          } else {
+            alert('Failed to update status: ' + response.message);
           }
-        } else {
-          alert('Failed to update status: ' + response.message);
-        }
-      },
-      error: (error) => {
-        console.error('Error updating status:', error);
-        if (error.status === 401) {
-          this.authService.logout();
-        } else {
-          alert('Failed to update status. Please try again.');
-        }
-      }
-    });
+        },
+        error: (error) => {
+          console.error('Error updating status:', error);
+          if (error.status === 401) {
+            this.authService.logout();
+          } else {
+            alert('Failed to update status. Please try again.');
+          }
+        },
+      });
 
     this.subscriptions.add(subscription);
   }
 
   onDeleteListing(listing: Listing): void {
     this.activeDropdown = null;
-    
-    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+
+    if (
+      !confirm(
+        'Are you sure you want to delete this listing? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
     const deleteData = {
-      userId: this.userId
+      userId: this.userId,
     };
 
     const token = this.authService.getToken();
     const headers: any = {};
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const subscription = this.http.request<{
-      success: boolean;
-      message: string;
-    }>('DELETE', `${this.ITEMS_ENDPOINT}/${listing.id}`, {
-      body: deleteData,
-      headers
-    }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Remove the listing from local array
-          this.myListings = this.myListings.filter(item => item.id !== listing.id);
-        } else {
-          alert('Failed to delete listing: ' + response.message);
-        }
-      },
-      error: (error) => {
-        console.error('Error deleting listing:', error);
-        if (error.status === 401) {
-          this.authService.logout();
-        } else {
-          alert('Failed to delete listing. Please try again.');
-        }
-      }
-    });
+    const subscription = this.http
+      .request<{
+        success: boolean;
+        message: string;
+      }>('DELETE', `${this.ITEMS_ENDPOINT}/${listing.id}`, {
+        body: deleteData,
+        headers,
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            // Remove the listing from local array
+            this.myListings = this.myListings.filter(
+              (item) => item.id !== listing.id
+            );
+          } else {
+            alert('Failed to delete listing: ' + response.message);
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting listing:', error);
+          if (error.status === 401) {
+            this.authService.logout();
+          } else {
+            alert('Failed to delete listing. Please try again.');
+          }
+        },
+      });
 
     this.subscriptions.add(subscription);
   }
