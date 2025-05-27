@@ -8,7 +8,9 @@ import { FooterComponent } from '../shared/footer/footer.component';
   standalone: true,
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
   template: `
-    <app-header></app-header>
+    <div class="sticky top-0 z-50 bg-white">
+      <app-header></app-header>
+    </div>
     <main class="min-h-screen">
       <router-outlet></router-outlet>
     </main>

@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
   standalone: true,
   imports: [CommonModule, RouterModule, AsyncPipe],
   template: `
-    <header class="w-full bg-orange-100 px-6 py-4 shadow flex items-center justify-between">
+    <header class="w-full bg-orange-100 px-6 py-2 shadow flex items-center justify-between">
       <!-- Logo -->
       <div class="text-2xl font-bold text-orange-600 cursor-pointer" (click)="navigateHome()">
         Lost & Found
