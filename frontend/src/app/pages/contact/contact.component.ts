@@ -118,7 +118,7 @@ interface Item {
         <div class="bg-white rounded-xl shadow-lg p-6" *ngIf="isLoggedIn && !isOwnItem && item && !isLoadingItem">
           <div class="mb-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-2">Send Message</h2>
-            <p class="text-gray-600">Your message will be sent to the item owner.</p>
+            <p class="text-gray-600">Your message will be sent to the item owner via email.</p>
           </div>
 
           <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -127,6 +127,12 @@ interface Item {
               <h3 class="text-sm font-medium text-gray-700 mb-2">Sending as:</h3>
               <p class="text-gray-800">{{ currentUser?.username || currentUser?.email }}</p>
               <p class="text-gray-600 text-sm">{{ currentUser?.email }}</p>
+            </div>
+
+            <!-- Recipient Info -->
+            <div class="bg-blue-50 rounded-lg p-4" *ngIf="item?.contactInfo">
+              <h3 class="text-sm font-medium text-blue-700 mb-2">Message will be sent to:</h3>
+              <p class="text-blue-800">{{ item.contactInfo }}</p>
             </div>
 
             <!-- Message -->
@@ -189,7 +195,7 @@ interface Item {
               </svg>
               <div>
                 <h3 class="text-green-800 font-medium">Message Sent Successfully!</h3>
-                <p class="text-green-700 text-sm">Your message has been sent to the item owner.</p>
+                <p class="text-green-700 text-sm">Your message has been sent to the item owner. Both you and the recipient will receive email confirmations.</p>
               </div>
             </div>
           </div>
@@ -283,8 +289,6 @@ export class ContactComponent implements OnInit {
     private router: Router
   ) {}
 
-  
-
   ngOnInit(): void {
     // Get item ID from route
     this.itemId = this.route.snapshot.paramMap.get('id') || '';
@@ -357,6 +361,7 @@ export class ContactComponent implements OnInit {
     this.contactForm.reset();
     this.showSuccessMessage = false;
     this.showErrorMessage = false;
+    this.errorMessage = '';
   }
 
   onSubmit(): void {
@@ -377,51 +382,38 @@ export class ContactComponent implements OnInit {
 
     this.isSubmitting = true;
     this.showErrorMessage = false;
+    this.showSuccessMessage = false;
 
     const messageData = {
-      itemId: this.itemId,
-      message: this.contactForm.get('message')?.value,
       senderEmail: this.currentUser.email,
-      senderName: this.currentUser.name || this.currentUser.email,
       receiverEmail: this.item.contactInfo.trim(),
-      itemTitle: this.item.title
+      message: this.contactForm.get('message')?.value
     };
 
-    // TODO: Replace with actual API call
     this.sendMessage(messageData);
   }
 
   private sendMessage(messageData: any): void {
-    // Simulate API call - replace with actual HTTP service call
-    setTimeout(() => {
-      // Simulate success/error
-      const isSuccess = Math.random() > 0.1; // 90% success rate for demo
-      
-      this.isSubmitting = false;
-      
-      if (isSuccess) {
-        this.showSuccessMessage = true;
-        this.contactForm.reset();
-      } else {
-        this.showErrorMessage = true;
-        this.errorMessage = 'Failed to send message. Please try again.';
-      }
-    }, 1500);
-
-    /* 
-    // Example of actual HTTP call:
-    this.http.post('/api/messages/send', messageData).subscribe({
+    const apiUrl = `${baseUrl}/api/email/send-email`;
+    
+    this.http.post<{success: boolean, message: string}>(apiUrl, messageData).subscribe({
       next: (response) => {
         this.isSubmitting = false;
-        this.showSuccessMessage = true;
-        this.contactForm.reset();
+        if (response.success) {
+          this.showSuccessMessage = true;
+          this.contactForm.reset();
+          this.errorMessage = '';
+        } else {
+          this.showErrorMessage = true;
+          this.errorMessage = response.message || 'Failed to send message. Please try again.';
+        }
       },
       error: (error) => {
         this.isSubmitting = false;
         this.showErrorMessage = true;
-        this.errorMessage = error.error?.message || 'Failed to send message. Please try again.';
+        this.errorMessage = error.error?.error || error.error?.message || 'Failed to send message. Please try again.';
+        console.error('Error sending message:', error);
       }
     });
-    */
   }
 }
