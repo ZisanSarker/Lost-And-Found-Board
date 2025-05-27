@@ -11,6 +11,7 @@ import {
   Message,
   Notification,
 } from '../../shared/services/data.service';
+import { AuthService } from '../../features/auth/auth.service'; // Add this import
 
 import { ProfileSidebarComponent } from '../../shared/components/profile-sidebar/profile-sidebar.component';
 import { NotificationSidebarComponent } from '../../shared/components/notification-sidebar/notification-sidebar.component';
@@ -97,11 +98,19 @@ import { DashboardHeaderComponent } from '../../shared/components/dashboard-head
             </div>
 
             <ng-container *ngIf="!isLoading && !errorMessage">
-              <app-my-listings
-                *ngIf="activeTab === 'my-listings'"
-                [listings]="myListings"
-              >
+              <!-- Only render MyListingsComponent if currentUserId is available -->
+              <app-my-listings 
+                *ngIf="currentUserId" 
+                [userId]="currentUserId">
               </app-my-listings>
+              
+              <!-- Show message if no user ID available -->
+              <div 
+                *ngIf="!currentUserId" 
+                class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6"
+              >
+                <p class="text-yellow-700">Unable to load user information. Please try logging in again.</p>
+              </div>
 
               <app-message-tab
                 *ngIf="activeTab === 'messages'"
@@ -128,20 +137,54 @@ export class DashboardComponent implements OnInit, OnDestroy {
   activeTab: string = 'my-listings';
   isLoading: boolean = false;
   errorMessage: string = '';
+  currentUserId: string | null = null; // Add this property
   private subscriptions: Subscription = new Subscription();
 
   myListings: Listing[] = [];
   messages: Message[] = [];
   notifications: Notification[] = [];
 
-  constructor(private dataService: DataService) {}
+  constructor(
+    private dataService: DataService,
+    private authService: AuthService // Inject AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.initializeUser();
     this.loadData();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  private initializeUser(): void {
+    // Subscribe to user changes to handle real-time updates
+    const userSubscription = this.authService.user$.subscribe({
+      next: (user) => {
+        if (user && user.id) {
+          this.currentUserId = user.id;
+        } else {
+          this.currentUserId = null;
+          // If no user, redirect to login
+          if (!this.authService.isLoggedIn()) {
+            this.authService.logout();
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Error getting user information:', error);
+        this.currentUserId = null;
+      }
+    });
+
+    this.subscriptions.add(userSubscription);
+
+    // Also try to get user immediately (in case user$ hasn't emitted yet)
+    const currentUser = this.authService.getUser();
+    if (currentUser && currentUser.id) {
+      this.currentUserId = currentUser.id;
+    }
   }
 
   loadData(): void {

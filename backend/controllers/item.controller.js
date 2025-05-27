@@ -195,209 +195,176 @@ exports.getItemsByType = async (req, res) => {
   }
 };
 
-// // Get single item by ID
-// const getItemById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
+// Get items by user ID
+exports.getUserItems = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
-//     const item = await Item.findById(id);
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User ID is required'
+      });
+    }
 
-//     if (!item) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Item not found'
-//       });
-//     }
+    const items = await Item.find({ userId: userId })
+      .sort({ createdAt: -1 })
+      .lean();
 
-//     res.status(200).json({
-//       success: true,
-//       data: item
-//     });
+    const transformedItems = items.map(item => ({
+      id: item._id.toString(),
+      title: item.title,
+      description: item.description,
+      category: item.category,
+      location: item.location,
+      date: item.date,
+      type: item.type,
+      contactInfo: item.contactInfo,
+      userId: item.userId,
+      imageUrl: item.imageUrl,
+      status: item.status || 'active',
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
+    }));
 
-//   } catch (error) {
-//     if (error.name === 'CastError') {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Invalid item ID'
-//       });
-//     }
+    res.status(200).json({
+      success: true,
+      data: transformedItems,
+      count: transformedItems.length
+    });
 
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error',
-//       error: error.message
-//     });
-//   }
-// };
+  } catch (error) {
+    console.error('Error fetching user items:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user items',
+      error: error.message
+    });
+  }
+};
 
-// // Update item
-// const updateItem = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updates = req.body;
+// Update item
+exports.updateItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
 
-//     // Remove fields that shouldn't be updated
-//     delete updates._id;
-//     delete updates.reportedAt;
-//     delete updates.createdAt;
-//     delete updates.updatedAt;
+    // Remove fields that shouldn't be updated
+    delete updates._id;
+    delete updates.createdAt;
+    delete updates.updatedAt;
 
-//     const item = await Item.findById(id);
+    const item = await Item.findById(id);
 
-//     if (!item) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Item not found'
-//       });
-//     }
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item not found'
+      });
+    }
 
-//     // Check if user owns the item (basic authorization)
-//     if (updates.userId && item.userId !== updates.userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: 'You can only update your own items'
-//       });
-//     }
+    // Check if user owns the item
+    if (updates.userId && item.userId !== updates.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only update your own items'
+      });
+    }
 
-//     const updatedItem = await Item.findByIdAndUpdate(
-//       id,
-//       updates,
-//       {
-//         new: true,
-//         runValidators: true
-//       }
-//     );
+    const updatedItem = await Item.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    );
 
-//     res.status(200).json({
-//       success: true,
-//       message: 'Item updated successfully',
-//       data: updatedItem
-//     });
+    const transformedItem = {
+      id: updatedItem._id.toString(),
+      title: updatedItem.title,
+      description: updatedItem.description,
+      category: updatedItem.category,
+      location: updatedItem.location,
+      date: updatedItem.date,
+      type: updatedItem.type,
+      contactInfo: updatedItem.contactInfo,
+      userId: updatedItem.userId,
+      imageUrl: updatedItem.imageUrl,
+      status: updatedItem.status || 'active',
+      createdAt: updatedItem.createdAt,
+      updatedAt: updatedItem.updatedAt
+    };
 
-//   } catch (error) {
-//     if (error.name === 'ValidationError') {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Validation error',
-//         errors: Object.values(error.errors).map(err => err.message)
-//       });
-//     }
+    res.status(200).json({
+      success: true,
+      message: 'Item updated successfully',
+      data: transformedItem
+    });
 
-//     if (error.name === 'CastError') {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Invalid item ID'
-//       });
-//     }
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: Object.values(error.errors).map(err => err.message)
+      });
+    }
 
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error',
-//       error: error.message
-//     });
-//   }
-// };
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid item ID'
+      });
+    }
 
-// // Delete item
-// const deleteItem = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { userId } = req.body; // or get from auth middleware
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
 
-//     const item = await Item.findById(id);
+// Delete item
+exports.deleteItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
 
-//     if (!item) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Item not found'
-//       });
-//     }
+    const item = await Item.findById(id);
 
-//     // Check if user owns the item (basic authorization)
-//     if (userId && item.userId !== userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: 'You can only delete your own items'
-//       });
-//     }
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: 'Item not found'
+      });
+    }
 
-//     await Item.findByIdAndDelete(id);
+    // Check if user owns the item
+    if (userId && item.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete your own items'
+      });
+    }
 
-//     res.status(200).json({
-//       success: true,
-//       message: 'Item deleted successfully'
-//     });
+    await Item.findByIdAndDelete(id);
 
-//   } catch (error) {
-//     if (error.name === 'CastError') {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Invalid item ID'
-//       });
-//     }
+    res.status(200).json({
+      success: true,
+      message: 'Item deleted successfully'
+    });
 
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error',
-//       error: error.message
-//     });
-//   }
-// };
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid item ID'
+      });
+    }
 
-// // Update item status (mark as found/closed)
-// const updateItemStatus = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { status, userId } = req.body;
-
-//     if (!['active', 'found', 'closed'].includes(status)) {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Invalid status. Must be active, found, or closed'
-//       });
-//     }
-
-//     const item = await Item.findById(id);
-
-//     if (!item) {
-//       return res.status(404).json({
-//         success: false,
-//         message: 'Item not found'
-//       });
-//     }
-
-//     // Check if user owns the item
-//     if (userId && item.userId !== userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: 'You can only update your own items'
-//       });
-//     }
-
-//     const updatedItem = await Item.findByIdAndUpdate(
-//       id,
-//       { status },
-//       { new: true, runValidators: true }
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       message: 'Item status updated successfully',
-//       data: updatedItem
-//     });
-
-//   } catch (error) {
-//     if (error.name === 'CastError') {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Invalid item ID'
-//       });
-//     }
-
-//     res.status(500).json({
-//       success: false,
-//       message: 'Server error',
-//       error: error.message
-//     });
-//   }
-// };
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};

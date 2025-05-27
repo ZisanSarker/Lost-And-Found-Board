@@ -1,10 +1,28 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { RouterModule, Router } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Subscription } from 'rxjs';
-import { DataService, Listing } from '../../services/data.service';
+import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../features/auth/auth.service';
+
+export interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  date: string;
+  type: 'lost' | 'found';
+  contactInfo: string;
+  userId: string;
+  imageUrl?: string;
+  image?: string; // For backward compatibility
+  status?: 'active' | 'resolved';
+  createdAt: string;
+  updatedAt: string;
+}
 
 @Component({
   selector: 'app-my-listings',
@@ -106,7 +124,7 @@ import { DataService, Listing } from '../../services/data.service';
         <div *ngIf="errorMessage && !isLoading" class="text-center py-8">
           <p class="text-red-500">{{ errorMessage }}</p>
           <button
-            (click)="loadData()"
+            (click)="loadUserListings()"
             class="mt-4 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
           >
             Retry
@@ -139,7 +157,7 @@ import { DataService, Listing } from '../../services/data.service';
             <div class="flex flex-col md:flex-row">
               <div class="w-full md:w-48 h-48 bg-gray-200 relative group">
                 <img
-                  [src]="listing.image || 'assets/package_placeholder.jpg'"
+                  [src]="listing.imageUrl || listing.image || 'assets/package_placeholder.jpg'"
                   [alt]="listing.title"
                   width="300"
                   height="200"
@@ -355,7 +373,7 @@ import { DataService, Listing } from '../../services/data.service';
   `,
 })
 export class MyListingsComponent implements OnInit, OnDestroy {
-  @Input() listings: Listing[] = [];
+  @Input() userId: string = ''; // Current user ID - passed from parent component
 
   activeFilter: string = 'all';
   searchQuery: string = '';
@@ -372,14 +390,46 @@ export class MyListingsComponent implements OnInit, OnDestroy {
   ];
 
   myListings: Listing[] = [];
+  
+  // API Configuration
+  private readonly API_BASE_URL = environment.apiBaseUrl;
+  private readonly ITEMS_ENDPOINT = `${this.API_BASE_URL}/api/item`;
 
-  constructor(private dataService: DataService) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private authService: AuthService // Inject AuthService
+  ) {}
 
   ngOnInit(): void {
-    if (this.listings.length === 0) {
-      this.loadData();
-    } else {
-      this.myListings = this.listings;
+    // Subscribe to user changes to get the userId
+    const userSubscription = this.authService.user$.subscribe({
+      next: (user) => {
+        if (user && user.id) {
+          this.userId = user.id;
+          this.loadUserListings();
+        } else if (!this.userId) {
+          // Try to get user immediately if not available from observable
+          const currentUser = this.authService.getUser();
+          if (currentUser && currentUser.id) {
+            this.userId = currentUser.id;
+            this.loadUserListings();
+          } else {
+            this.errorMessage = 'User not authenticated. Please log in.';
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Error getting user information:', error);
+        this.errorMessage = 'Failed to get user information.';
+      }
+    });
+
+    this.subscriptions.add(userSubscription);
+
+    // If userId is already provided via @Input, load listings
+    if (this.userId) {
+      this.loadUserListings();
     }
   }
 
@@ -387,23 +437,50 @@ export class MyListingsComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  loadData(): void {
+  loadUserListings(): void {
+    if (!this.userId) {
+      this.errorMessage = 'User ID is required';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
-    const dataSubscription = this.dataService.getData().subscribe({
-      next: (data) => {
-        this.myListings = data.myListings;
+    // Add authorization header with token
+    const token = this.authService.getToken();
+    const headers: any = {};
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const subscription = this.http.get<{
+      success: boolean;
+      data: Listing[];
+      count: number;
+      message?: string;
+    }>(`${this.ITEMS_ENDPOINT}/user/${this.userId}`, { headers }).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.myListings = response.data || [];
+        } else {
+          this.errorMessage = response.message || 'Failed to load listings';
+        }
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading data:', error);
-        this.errorMessage = 'Failed to load data. Please try again.';
+        console.error('Error loading user listings:', error);
+        if (error.status === 401) {
+          this.errorMessage = 'Session expired. Please log in again.';
+          this.authService.logout();
+        } else {
+          this.errorMessage = error.error?.message || 'Failed to load listings. Please try again.';
+        }
         this.isLoading = false;
       },
     });
 
-    this.subscriptions.add(dataSubscription);
+    this.subscriptions.add(subscription);
   }
 
   setActiveFilter(filter: string): void {
@@ -412,11 +489,8 @@ export class MyListingsComponent implements OnInit, OnDestroy {
   }
 
   handleSearch(): void {
-    this.isLoading = true;
-    // Simulate search delay
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 500);
+    // No need for API call - filtering is done locally
+    this.activeDropdown = null;
   }
 
   toggleDropdown(listingId: string): void {
@@ -433,7 +507,8 @@ export class MyListingsComponent implements OnInit, OnDestroy {
         (listing) =>
           listing.title.toLowerCase().includes(query) ||
           listing.description.toLowerCase().includes(query) ||
-          listing.location.toLowerCase().includes(query)
+          listing.location.toLowerCase().includes(query) ||
+          listing.category.toLowerCase().includes(query)
       );
     }
 
@@ -469,31 +544,105 @@ export class MyListingsComponent implements OnInit, OnDestroy {
 
   // Event handlers for actions
   onViewListing(listing: Listing): void {
-    console.log('View listing:', listing);
     this.activeDropdown = null;
-    // Emit event or navigate to details page
+    // Navigate to item details page
+    this.router.navigate(['/item', listing.id]);
   }
 
   onEditListing(listing: Listing): void {
-    console.log('Edit listing:', listing);
     this.activeDropdown = null;
-    // Emit event or navigate to edit page
+    // Navigate to edit page
+    this.router.navigate(['/edit-item', listing.id]);
   }
 
   onToggleStatus(listing: Listing): void {
-    console.log('Toggle status:', listing);
     this.activeDropdown = null;
-    // Call service to update status
     const newStatus = listing.status === 'resolved' ? 'active' : 'resolved';
-    // this.dataService.updateListingStatus(listing.id, newStatus);
+    
+    const updateData = {
+      status: newStatus,
+      userId: this.userId
+    };
+
+    const token = this.authService.getToken();
+    const headers: any = {};
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const subscription = this.http.put<{
+      success: boolean;
+      message: string;
+      data: Listing;
+    }>(`${this.ITEMS_ENDPOINT}/${listing.id}`, updateData, { headers }).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Update the local listing
+          const index = this.myListings.findIndex(item => item.id === listing.id);
+          if (index !== -1) {
+            this.myListings[index] = { ...this.myListings[index], status: newStatus };
+          }
+        } else {
+          alert('Failed to update status: ' + response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error updating status:', error);
+        if (error.status === 401) {
+          this.authService.logout();
+        } else {
+          alert('Failed to update status. Please try again.');
+        }
+      }
+    });
+
+    this.subscriptions.add(subscription);
   }
 
   onDeleteListing(listing: Listing): void {
-    console.log('Delete listing:', listing);
     this.activeDropdown = null;
-    // Show confirmation dialog and delete
-    if (confirm('Are you sure you want to delete this listing?')) {
-      // this.dataService.deleteListing(listing.id);
+    
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+      return;
     }
+
+    const deleteData = {
+      userId: this.userId
+    };
+
+    const token = this.authService.getToken();
+    const headers: any = {};
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const subscription = this.http.request<{
+      success: boolean;
+      message: string;
+    }>('DELETE', `${this.ITEMS_ENDPOINT}/${listing.id}`, {
+      body: deleteData,
+      headers
+    }).subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Remove the listing from local array
+          this.myListings = this.myListings.filter(item => item.id !== listing.id);
+        } else {
+          alert('Failed to delete listing: ' + response.message);
+        }
+      },
+      error: (error) => {
+        console.error('Error deleting listing:', error);
+        if (error.status === 401) {
+          this.authService.logout();
+        } else {
+          alert('Failed to delete listing. Please try again.');
+        }
+      }
+    });
+
+    this.subscriptions.add(subscription);
   }
 }
