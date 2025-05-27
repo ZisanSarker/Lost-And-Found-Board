@@ -41,11 +41,11 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'messages',
+        path: 'items',
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import('./features/messages/messages.component').then(
-            (m) => m.MessagesComponent
+          import('./shared/components/all-posts/all-posts.component').then(
+            (m) => m.AllPostsComponent
           ),
       },
       {

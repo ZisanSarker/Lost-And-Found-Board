@@ -32,7 +32,7 @@ import { CommonModule } from '@angular/common';
         </svg>
         My Listings
       </button>
-      <button
+      <!-- <button
         [class]="getTabButtonClass('messages')"
         (click)="setActiveTab('messages')"
         class="border-2 border-orange-600"
@@ -59,8 +59,8 @@ import { CommonModule } from '@angular/common';
         >
           {{ unreadMessagesCount }}
         </span>
-      </button>
-      <button
+      </button> -->
+      <!-- <button
         [class]="getTabButtonClass('notifications')"
         (click)="setActiveTab('notifications')"
         class="border-2 border-orange-600"
@@ -87,7 +87,7 @@ import { CommonModule } from '@angular/common';
         >
           {{ unreadNotificationsCount }}
         </span>
-      </button>
+      </button> -->
     </div>
   `,
 })

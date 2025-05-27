@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
         <a routerLink="/home" routerLinkActive="text-orange-600" class="hover:text-orange-500">Home</a>
         <ng-container *ngIf="user$ | async">
           <a routerLink="/dashboard" routerLinkActive="text-orange-600" class="hover:text-orange-500">Dashboard</a>
-          <a routerLink="/messages" routerLinkActive="text-orange-600" class="hover:text-orange-500">Messages</a>
+          <a routerLink="/items" routerLinkActive="text-orange-600" class="hover:text-orange-500">All Posts</a>
         </ng-container>
       </nav>
       
