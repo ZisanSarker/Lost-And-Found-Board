@@ -16,7 +16,6 @@ import { AsyncPipe, NgIf } from '@angular/common';
     AllPostsComponent,
     HowItWorksComponent,
     CtaSectionComponent,
-    AsyncPipe,
     NgIf,
   ],
   template: `

@@ -69,7 +69,7 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'contact',
+        path: 'contact/:id',
         loadComponent: () =>
           import('./pages/contact/contact.component').then(
             (m) => m.ContactComponent

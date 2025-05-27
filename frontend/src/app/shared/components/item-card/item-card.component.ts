@@ -102,7 +102,7 @@ export class ItemCardComponent {
 
   onContact() {
     if (this.id) {
-      this.router.navigate(['/item-detail', this.id]);
+      this.router.navigate(['/contact', this.id]);
     } else {
       console.warn('No ID provided for item card navigation');
     }
