@@ -11,7 +11,7 @@ import { Component } from '@angular/core';
             How It Works
           </h2>
           <p class="mx-auto max-w-2xl md:text-xl mt-2 text-gray-700">
-            Our platform makes it easy to report and find lost items.
+            Our platform helps you post and find lost items with ease.
           </p>
         </div>
 
@@ -19,39 +19,45 @@ import { Component } from '@angular/core';
           <!-- Card 1 -->
           <div class="flex flex-col p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200 h-full text-center">
             <div class="mb-4 text-orange-500">
-              <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 00-2-2H5l7-4 7 4h-2a2 2 0 00-2 2v6" />
+              <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 4v16m8-8H4" />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">Interactive Maps</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Create Lost or Found Post</h3>
             <p class="text-gray-600 mt-auto">
-              Visualize where items were last seen or found to narrow your search.
+              Quickly create a post for your lost item or something you found with details and contact info.
             </p>
           </div>
 
           <!-- Card 2 -->
           <div class="flex flex-col p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200 h-full text-center">
             <div class="mb-4 text-orange-500">
-              <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4-.81L3 20l1.07-3.71A7.975 7.975 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 12a4 4 0 01-8 0m8 0a4 4 0 00-8 0m8 0H4m16 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">Direct Messaging</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Browse Listings</h3>
             <p class="text-gray-600 mt-auto">
-              Connect directly with the person who found or lost an item.
+              Explore all lost and found items posted by users to help return or reclaim belongings.
             </p>
           </div>
 
           <!-- Card 3 -->
           <div class="flex flex-col p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200 h-full text-center">
             <div class="mb-4 text-orange-500">
-              <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-5-5.917V5a2 2 0 10-4 0v.083A6.002 6.002 0 004 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5m8 0a3 3 0 11-6 0h6z" />
+              <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 10l1.293 1.293a1 1 0 001.414 0L10 7l7 7m0 0v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5m14 0l3-3" />
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">Smart Notifications</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Connect via Contact Info</h3>
             <p class="text-gray-600 mt-auto">
-              Get alerted when potential matches to your lost or found item are posted.
+              Contact the person who lost or found the item using provided email or phone number.
             </p>
           </div>
         </div>

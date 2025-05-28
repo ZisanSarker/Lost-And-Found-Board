@@ -173,17 +173,14 @@ export class CtaSectionComponent {
   showModal = signal(false);
 
   signUp() {
-    // Navigate to sign up page
     this.router.navigate(['/auth/sign-up']);
   }
 
   postLostItem() {
-    // Navigate to post lost item form
     this.router.navigate(['/repost/lost']);
   }
 
   postFoundItem() {
-    // Navigate to post found item form
     this.router.navigate(['/repost/found']);
   }
 

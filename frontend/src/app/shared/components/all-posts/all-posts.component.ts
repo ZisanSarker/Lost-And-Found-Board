@@ -8,7 +8,6 @@ import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { environment } from '../../../../environments/environment';
 const baseUrl = environment.apiBaseUrl;
 
-// Updated interface to match backend response
 interface Item {
   id: string;
   title: string;
@@ -19,13 +18,12 @@ interface Item {
   type: 'lost' | 'found';
   contactInfo: string;
   userId: string;
-  image?: string; // For backward compatibility
-  imageUrl?: string; // Primary image field
+  image?: string;
+  imageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
-// Backend API response interface
 interface ApiResponse {
   success: boolean;
   data: Item[];

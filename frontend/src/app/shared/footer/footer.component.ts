@@ -12,7 +12,7 @@ import { RouterModule } from '@angular/router';
         <nav class="flex gap-4 text-md font-medium">
           <a routerLink="/terms" class="hover:text-orange-600 transition-colors">Terms</a>
           <a routerLink="/privacy" class="hover:text-orange-600 transition-colors">Privacy</a>
-          <a routerLink="/contact" class="hover:text-orange-600 transition-colors">Contact</a>
+          <a routerLink="/contact-us" class="hover:text-orange-600 transition-colors">Contact</a>
         </nav>
       </div>
     </footer>

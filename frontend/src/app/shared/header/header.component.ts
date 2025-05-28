@@ -37,8 +37,8 @@ import { Observable } from 'rxjs';
               <!-- User Avatar -->
               <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-orange-300">
                 <img 
-                  *ngIf="user.profilePhoto; else avatarFallback"
-                  [src]="user.profilePhoto" 
+                  *ngIf="user.avatar; else avatarFallback"
+                  [src]="user.avatar" 
                   [alt]="user.username || user.name || 'User'"
                   class="w-full h-full object-cover"
                 />
@@ -171,7 +171,6 @@ export class HeaderComponent {
   private authService = inject(AuthService);
   user$: Observable<any | null> = this.authService.user$;
   
-  // Dropdown state
   isDropdownOpen = signal(false);
   showLogoutModal = signal(false);
 
@@ -208,7 +207,6 @@ export class HeaderComponent {
   }
 
   navigateHome(): void {
-    // This will trigger the route resolution and appropriate redirects
     window.location.href = '/';
   }
 }

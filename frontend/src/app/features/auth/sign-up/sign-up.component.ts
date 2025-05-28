@@ -21,7 +21,9 @@ const baseUrl = environment.apiBaseUrl;
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule, RouterModule],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-orange-50 px-4">
+    <div
+      class="min-h-screen flex items-center justify-center bg-orange-50 px-4"
+    >
       <form
         [formGroup]="form"
         (ngSubmit)="onSubmit()"
@@ -31,7 +33,10 @@ const baseUrl = environment.apiBaseUrl;
 
         <!-- Full Name -->
         <div>
-          <label for="username" class="block text-sm font-semibold text-orange-800 mb-1">
+          <label
+            for="username"
+            class="block text-sm font-semibold text-orange-800 mb-1"
+          >
             Full Name
           </label>
           <input
@@ -41,14 +46,20 @@ const baseUrl = environment.apiBaseUrl;
             class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="Zisan Sarker"
           />
-          <p *ngIf="username?.touched && username?.invalid" class="text-sm text-red-600 mt-1">
+          <p
+            *ngIf="username?.touched && username?.invalid"
+            class="text-sm text-red-600 mt-1"
+          >
             Full name is required and must contain only letters.
           </p>
         </div>
 
         <!-- Email -->
         <div>
-          <label for="email" class="block text-sm font-semibold text-orange-800 mb-1">
+          <label
+            for="email"
+            class="block text-sm font-semibold text-orange-800 mb-1"
+          >
             Email
           </label>
           <input
@@ -58,14 +69,20 @@ const baseUrl = environment.apiBaseUrl;
             class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="you@example.com"
           />
-          <p *ngIf="email?.invalid && email?.touched" class="text-sm text-red-600 mt-1">
+          <p
+            *ngIf="email?.invalid && email?.touched"
+            class="text-sm text-red-600 mt-1"
+          >
             A valid email is required.
           </p>
         </div>
 
         <!-- Password -->
         <div>
-          <label for="password" class="block text-sm font-semibold text-orange-800 mb-1">
+          <label
+            for="password"
+            class="block text-sm font-semibold text-orange-800 mb-1"
+          >
             Password
           </label>
           <input
@@ -75,20 +92,32 @@ const baseUrl = environment.apiBaseUrl;
             class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="••••••••"
           />
-          <p *ngIf="password?.touched && password?.errors?.['required']" class="text-sm text-red-600 mt-1">
+          <p
+            *ngIf="password?.touched && password?.errors?.['required']"
+            class="text-sm text-red-600 mt-1"
+          >
             Password is required.
           </p>
-          <p *ngIf="password?.touched && password?.errors?.['minlength']" class="text-sm text-red-600 mt-1">
+          <p
+            *ngIf="password?.touched && password?.errors?.['minlength']"
+            class="text-sm text-red-600 mt-1"
+          >
             Password must be at least 8 characters long.
           </p>
-          <p *ngIf="password?.touched && password?.errors?.['pattern']" class="text-sm text-red-600 mt-1">
+          <p
+            *ngIf="password?.touched && password?.errors?.['pattern']"
+            class="text-sm text-red-600 mt-1"
+          >
             Must include uppercase, lowercase, number, and special character.
           </p>
         </div>
 
         <!-- Confirm Password -->
         <div>
-          <label for="confirmPassword" class="block text-sm font-semibold text-orange-800 mb-1">
+          <label
+            for="confirmPassword"
+            class="block text-sm font-semibold text-orange-800 mb-1"
+          >
             Confirm Password
           </label>
           <input
@@ -98,10 +127,16 @@ const baseUrl = environment.apiBaseUrl;
             class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             placeholder="••••••••"
           />
-          <p *ngIf="confirmPassword?.touched && confirmPassword?.invalid" class="text-sm text-red-600 mt-1">
+          <p
+            *ngIf="confirmPassword?.touched && confirmPassword?.invalid"
+            class="text-sm text-red-600 mt-1"
+          >
             Confirm password is required.
           </p>
-          <p *ngIf="form.errors?.['passwordsMismatch'] && confirmPassword?.touched" class="text-sm text-red-600 mt-1">
+          <p
+            *ngIf="form.errors?.['passwordsMismatch'] && confirmPassword?.touched"
+            class="text-sm text-red-600 mt-1"
+          >
             Passwords do not match.
           </p>
         </div>
@@ -114,11 +149,15 @@ const baseUrl = environment.apiBaseUrl;
         >
           {{ isLoading ? 'Creating Account...' : 'Sign Up' }}
         </button>
-        
+
         <!-- Sign In Link -->
         <div class="text-center">
-          <p class="text-gray-600">Already have an account? 
-            <a routerLink="/auth/sign-in" class="text-orange-600 hover:text-orange-700 font-semibold">
+          <p class="text-gray-600">
+            Already have an account?
+            <a
+              routerLink="/auth/sign-in"
+              class="text-orange-600 hover:text-orange-700 font-semibold"
+            >
               Sign In
             </a>
           </p>
@@ -130,7 +169,7 @@ const baseUrl = environment.apiBaseUrl;
 export class SignUpComponent implements OnInit {
   form: FormGroup;
   isLoading = false;
-  
+
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -140,7 +179,10 @@ export class SignUpComponent implements OnInit {
   constructor() {
     this.form = this.fb.group(
       {
-        username: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]{2,}$/)]],
+        username: [
+          '',
+          [Validators.required, Validators.pattern(/^[a-zA-Z\s]{2,}$/)],
+        ],
         email: ['', [Validators.required, Validators.email]],
         password: [
           '',
@@ -148,7 +190,7 @@ export class SignUpComponent implements OnInit {
             Validators.required,
             Validators.minLength(8),
             Validators.pattern(
-              '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$'
+              '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=[\\]{};:\'",.<>/?\\\\|`~])[A-Za-z\\d!@#$%^&*()_+\\-=[\\]{};:\'",.<>/?\\\\|`~]{8,}$'
             ),
           ],
         ],
@@ -180,11 +222,14 @@ export class SignUpComponent implements OnInit {
     const { username, email, password } = this.form.value;
 
     this.http
-      .post<{ accessToken: string; user: any }>(`${baseUrl}/api/auth/register`, {
-        username,
-        email,
-        password
-      })
+      .post<{ accessToken: string; user: any }>(
+        `${baseUrl}/api/auth/register`,
+        {
+          username,
+          email,
+          password,
+        }
+      )
       .subscribe({
         next: (res) => {
           this.isLoading = false;
@@ -192,7 +237,9 @@ export class SignUpComponent implements OnInit {
             this.authService.login(res.accessToken, res.user);
             this.toast.success('Sign-up successful! Welcome to Lost & Found!');
           } else {
-            this.toast.error('Registration successful but no access token received.');
+            this.toast.error(
+              'Registration successful but no access token received.'
+            );
           }
         },
         error: (error) => {

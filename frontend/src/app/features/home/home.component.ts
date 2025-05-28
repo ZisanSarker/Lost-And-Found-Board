@@ -1,11 +1,11 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HeroComponent } from "../../shared/components/hero/hero.component";
 import { AllPostsComponent } from "../../shared/components/all-posts/all-posts.component";
 import { HowItWorksComponent } from "../../shared/components/how-it-work/how-it-work.component";
 import { CtaSectionComponent } from '../../shared/components/cta-section/cta-section.component';
 import { AuthService } from '../auth/auth.service';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-home',
