@@ -10,16 +10,13 @@ const connectDB = async () => {
       console.error('MongoDB connection string not found in environment variables'.red.bold);
       process.exit(1);
     }
-
-    // Connection options for reliability and performance
     const options = {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      heartbeatFrequencyMS: 10000,    // Check server status every 10s
+      serverSelectionTimeoutMS: 5000,
+      heartbeatFrequencyMS: 10000,
     };
 
     const conn = await mongoose.connect(mongoUri, options);
-    
-    // Set up connection event listeners
+
     mongoose.connection.on('error', err => {
       console.error(`MongoDB connection error: ${err.message}`.red.bold);
     });

@@ -77,7 +77,6 @@ exports.createItem = async (req, res) => {
 };
 
 
-// Get items by type (lost or found)
 exports.getItemsByType = async (req, res) => {
   try {
     const { type } = req.params;
@@ -93,7 +92,6 @@ exports.getItemsByType = async (req, res) => {
       .populate('userId', 'name email')
       .lean(); 
 
-    // Transform data to match frontend expectations
     const transformedItems = items.map(item => ({
       id: item._id.toString(),
       title: item.title,
@@ -127,7 +125,6 @@ exports.getItemsByType = async (req, res) => {
   }
 };
 
-// Get items by user ID
 exports.getUserItems = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -219,7 +216,6 @@ exports.getItemById = async (req, res) => {
 };
 
 
-// Update item
 exports.updateItem = async (req, res) => {
   try {
     const id = req.params.id || req.body.id;
@@ -250,7 +246,6 @@ exports.updateItem = async (req, res) => {
       });
     }
 
-    // Check if user owns the item
     if (userId && item.userId.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
@@ -258,7 +253,6 @@ exports.updateItem = async (req, res) => {
       });
     }
 
-    // Update allowed fields only
     if (title !== undefined) item.title = title;
     if (category !== undefined) item.category = category;
     if (description !== undefined) item.description = description;
@@ -315,9 +309,6 @@ exports.updateItem = async (req, res) => {
 };
 
 
-
-
-// Delete item
 exports.deleteItem = async (req, res) => {
   try {
     const { id } = req.params;
@@ -332,7 +323,6 @@ exports.deleteItem = async (req, res) => {
       });
     }
 
-    // Check if user owns the item
     if (userId && item.userId !== userId) {
       return res.status(403).json({
         success: false,

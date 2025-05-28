@@ -15,9 +15,6 @@ exports.getProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    console.log(`Profile fetched for: ${user.email}`.blue.bold);
-
     res.status(200).json({
       message: 'Profile retrieved successfully',
       user: sanitizeUser(user)
@@ -31,10 +28,7 @@ exports.getProfile = async (req, res) => {
 // ─────────── Update Profile ───────────
 exports.updateProfile = async (req, res) => {
   try {
-    // Filter out fields that shouldn't be updated via profile
     const { password, passwordChangedAt, passwordResetToken, passwordResetExpires, ...allowedUpdates } = req.body;
-
-    // Only allow specific fields to be updated
     const filteredBody = {};
     const allowedFields = ['username', 'email', 'phone', 'location', 'bio', 'avatar'];
     
@@ -44,12 +38,10 @@ exports.updateProfile = async (req, res) => {
       }
     });
 
-    // Validate email if provided
     if (filteredBody.email && !validator.isEmail(filteredBody.email)) {
       return res.status(400).json({ message: 'Invalid email address' });
     }
 
-    // Check if email already exists (if updating email)
     if (filteredBody.email) {
       const existingUser = await User.findOne({ 
         email: filteredBody.email, 
@@ -73,16 +65,13 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log(`Profile updated for: ${updatedUser.email}`.green.bold);
-
     res.status(200).json({
       message: 'Profile updated successfully',
       user: sanitizeUser(updatedUser)
     });
   } catch (err) {
     console.error(`Update Profile Error: ${err.message}`.red.bold);
-    
-    // Handle validation errors
+
     if (err.name === 'ValidationError') {
       const errors = Object.values(err.errors).map(e => e.message);
       return res.status(400).json({ message: errors.join(', ') });
@@ -102,8 +91,6 @@ exports.deleteProfile = async (req, res) => {
     }
 
     await User.findByIdAndDelete(req.userId);
-
-    console.log(`Profile deleted for: ${user.email}`.yellow.bold);
 
     res.status(200).json({
       message: 'Profile deleted successfully'

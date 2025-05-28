@@ -2,7 +2,6 @@ const nodemailer = require('nodemailer');
 
 exports.sendEmails = async (req, res) => {
   const { senderEmail, receiverEmail, message } = req.body;
-  console.log("test")
 
   if (!senderEmail || !receiverEmail || !message) {
     return res.status(400).json({ error: 'All fields are required.' });
@@ -33,7 +32,6 @@ exports.sendEmails = async (req, res) => {
       text: `Hey! Your message was successfully sent to ${receiverEmail}.\n\nYour message:\n${message}`,
     };
 
-    // Send both emails
     await transporter.sendMail(receiverMail);
     await transporter.sendMail(senderMail);
 

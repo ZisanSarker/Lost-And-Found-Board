@@ -2,86 +2,87 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: [true, 'Username is required'],
-    trim: true,
-    minlength: [3, 'Username must be at least 3 characters'],
-    maxlength: [50, 'Username cannot exceed 50 characters'],
-  },
-  email: {
-    type: String,
-    required: [true, 'Email is required'],
-    unique: true,
-    lowercase: true,
-    trim: true,
-    validate: {
-      validator: function (val) {
-        return validator.isEmail(val);
-      },
-      message: 'Please provide a valid email',
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: [true, 'Username is required'],
+      trim: true,
+      minlength: [3, 'Username must be at least 3 characters'],
+      maxlength: [50, 'Username cannot exceed 50 characters'],
     },
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters'],
-    select: false,
-  },
-    phone: {
-    type: String,
-    trim: true,
-    validate: {
-      validator: function(val) {
-        // Allow empty phone or validate phone format
-        return !val || validator.isMobilePhone(val);
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: function (val) {
+          return validator.isEmail(val);
+        },
+        message: 'Please provide a valid email',
       },
-      message: 'Please provide a valid phone number'
-    }
-  },
-  location: {
-    type: String,
-    trim: true,
-    maxlength: [100, 'Location cannot exceed 100 characters'],
-    default: '',
-  },
-  bio: {
-    type: String,
-    trim: true,
-    maxlength: [500, 'Bio cannot exceed 500 characters'],
-    default: '',
-  },
-  avatar: {
-    type: String,
-    default: 'https://plus.unsplash.com/premium_vector-1741992520506-bc31b1405729?q=80&w=1954&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  },
+    },
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      minlength: [8, 'Password must be at least 8 characters'],
+      select: false,
+    },
+    phone: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: function (val) {
+          return !val || validator.isMobilePhone(val);
+        },
+        message: 'Please provide a valid phone number',
+      },
+    },
+    location: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Location cannot exceed 100 characters'],
+      default: '',
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Bio cannot exceed 500 characters'],
+      default: '',
+    },
+    avatar: {
+      type: String,
+      default:
+        'https://plus.unsplash.com/premium_vector-1741992520506-bc31b1405729?q=80&w=1954&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    },
 
-  // Verification status
-  verified: {
-    type: Boolean,
-    default: false,
-  },
-  
-  // Join date (this will be automatically set by timestamps: true, but adding explicit field)
-  joinDate: {
-    type: Date,
-    default: Date.now,
-  },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
 
-  lastLogin: {
-    type: Date,
-    default: null,
-  },
+    joinDate: {
+      type: Date,
+      default: Date.now,
+    },
 
-  passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true },
-});
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
+
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
 
 userSchema.index({ username: 1 });
 
@@ -101,26 +102,25 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-
-userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-/**
- * Instance method: check if password was changed after token was issued
- */
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
-    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
     return JWTTimestamp < changedTimestamp;
   }
 
   return false;
 };
 
-/**
- * Instance method: sanitize user object before sending to client
- */
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;

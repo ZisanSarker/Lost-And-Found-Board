@@ -9,7 +9,7 @@ const cookieOptions = (maxAge) => ({
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
   maxAge,
-  path: '/'
+  path: '/',
 });
 
 const sanitizeUser = (user) => {
@@ -17,43 +17,61 @@ const sanitizeUser = (user) => {
   return userObj;
 };
 
-
 // ─────────── Register ───────────
 exports.register = async (req, res) => {
   const { username, email, password } = req.body;
 
-  // Basic validations
   if (!username || !email || !password) {
-    return res.status(400).json({ message: 'Please provide all required fields' });
+    return res
+      .status(400)
+      .json({ message: 'Please provide all required fields' });
   }
 
   if (!validator.isEmail(email)) {
     return res.status(400).json({ message: 'Invalid email address' });
   }
 
-  if (password.length < 8 || !/\d/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-    return res.status(400).json({ message: 'Password must be at least 8 characters, include a number and special character' });
+  if (
+    (!validator.isStrongPassword(password),
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    })
+  ) {
+    return res
+      .status(400)
+      .json({
+        message:
+          'Password must be at least 8 characters, include a number and special character',
+      });
   }
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Email already exists' });
-
-    // Create new user (password hashing handled by model pre-save hook)
+    if (existingUser){
+      return res.status(400).json({ message: 'Email already exists' });
+    }
     const newUser = await User.create({ username, email, password });
 
     const { accessToken, refreshToken } = generateTokens(newUser._id);
 
-    res.cookie('accessToken', accessToken, cookieOptions(15 * 60 * 1000));
-    res.cookie('refreshToken', refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
+    const accessTime = 7 * 24 * 60 * 60 * 1000;
+    const refreshTime = 30 * 24 * 60 * 60 * 1000;
 
-    console.log(`Registered: ${email}`.green.bold);
-
+    res.cookie('accessToken', accessToken, cookieOptions(accessTime));
+    res.cookie(
+      'refreshToken',
+      refreshToken,
+      cookieOptions(refreshTime)
+    );
     res.status(201).json({
       message: 'Registered successfully',
       user: sanitizeUser(newUser),
       accessToken,
-      refreshToken
+      refreshToken,
     });
   } catch (err) {
     console.error(`Register Error: ${err.message}`.red.bold);
@@ -64,31 +82,37 @@ exports.register = async (req, res) => {
 // ─────────── Login ───────────
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ message: 'Please provide both email and password' });
+  if (!email || !password)
+    return res
+      .status(400)
+      .json({ message: 'Please provide both email and password' });
 
   try {
     const user = await User.findOne({ email }).select('+password');
-    
+
     if (!user || !(await user.correctPassword(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Update last login time
     user.lastLogin = Date.now();
     await user.save({ validateBeforeSave: false });
 
     const { accessToken, refreshToken } = generateTokens(user._id);
 
-    res.cookie('accessToken', accessToken, cookieOptions(15 * 60 * 1000));
-    res.cookie('refreshToken', refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
+    const accessTime = 7 * 24 * 60 * 60 * 1000;
+    const refreshTime = 30 * 24 * 60 * 60 * 1000;
 
-    console.log(`Logged in: ${email}`.blue.bold);
-
+    res.cookie('accessToken', accessToken, cookieOptions(accessTime));
+    res.cookie(
+      'refreshToken',
+      refreshToken,
+      cookieOptions(refreshTime)
+    );
     res.status(200).json({
       message: 'Logged in successfully',
       user: sanitizeUser(user),
       accessToken,
-      refreshToken
+      refreshToken,
     });
   } catch (err) {
     console.error(`Login Error: ${err.message}`.red.bold);
@@ -99,35 +123,14 @@ exports.login = async (req, res) => {
 // ─────────── Logout ───────────
 exports.logout = (req, res) => {
   try {
-    // Clear JWT cookies
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');
-
-    // Passport logout (for OAuth session)
-    req.logout((err) => {
-      if (err) {
-        console.error(`Logout Error: ${err.message}`.red.bold);
-        return res.status(500).json({ message: 'Logout failed' });
-      }
-
-      // Log the event
-      if (req.user?.email) {
-        console.log(`Logged out: ${req.user.email}`.yellow.bold);
-      } else if (req.userId) {
-        console.log(`Logged out user ID: ${req.userId}`.yellow.bold);
-      } else {
-        console.log(`Logged out anonymous session`.yellow.bold);
-      }
-
-      // Send logout success response
-      res.status(200).json({ message: 'Logged out successfully' });
-    });
+    res.status(200).json({ message: 'Logged out successfully' });
   } catch (err) {
     console.error(`❌ Logout Error: ${err.message}`.red.bold);
     res.status(500).json({ message: 'Server error during logout' });
   }
 };
-
 
 // ─────────── Refresh Token ───────────
 exports.refreshToken = (req, res) => {
@@ -138,11 +141,18 @@ exports.refreshToken = (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(refreshTokenFromClient, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(
+      refreshTokenFromClient,
+      process.env.JWT_REFRESH_SECRET
+    );
     const { accessToken, refreshToken } = generateTokens(decoded.userId);
 
     res.cookie('accessToken', accessToken, cookieOptions(15 * 60 * 1000));
-    res.cookie('refreshToken', refreshToken, cookieOptions(7 * 24 * 60 * 60 * 1000));
+    res.cookie(
+      'refreshToken',
+      refreshToken,
+      cookieOptions(7 * 24 * 60 * 60 * 1000)
+    );
 
     res.status(200).json({ message: 'Tokens refreshed successfully' });
   } catch (err) {
