@@ -1,8 +1,6 @@
 {
+  "public": "dist/lost-and-found-board/browser",
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
