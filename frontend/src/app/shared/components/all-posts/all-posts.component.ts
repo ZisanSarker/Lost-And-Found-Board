@@ -145,7 +145,6 @@ export class AllPostsComponent implements OnInit {
       this.showAll = false;
       this.error = '';
 
-      // Load data only for the selected tab if not already loaded
       if (tab === 'lost' && this.lostItems.length === 0) {
         this.loadItemsByType('lost');
       } else if (tab === 'found' && this.foundItems.length === 0) {
@@ -158,20 +157,17 @@ export class AllPostsComponent implements OnInit {
     this.error = '';
     this.isLoading = true;
     
-    // Load both types of items
     forkJoin({
       lost: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/lost`),
       found: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/found`)
     }).subscribe({
       next: (responses) => {
-        // Handle lost items
         if (responses.lost.success) {
           this.lostItems = responses.lost.data;
         } else {
           console.error('Failed to load lost items:', responses.lost.message);
         }
 
-        // Handle found items
         if (responses.found.success) {
           this.foundItems = responses.found.data;
         } else {
@@ -254,12 +250,9 @@ export class AllPostsComponent implements OnInit {
   }
 
   private getItemCategory(item: Item): string {
-    // First check if item has explicit category
     if (item.category && item.category !== 'other') {
       return item.category;
     }
-
-    // Fallback to text-based categorization
     const text = (item.title + ' ' + item.description).toLowerCase();
 
     if (text.includes('phone') || text.includes('laptop') || text.includes('watch') || 
