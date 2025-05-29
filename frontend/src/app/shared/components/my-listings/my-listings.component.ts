@@ -383,7 +383,6 @@ export class MyListingsComponent implements OnInit, OnDestroy {
           this.userId = user.id;
           this.loadUserListings();
         } else if (!this.userId) {
-          // Try to get user immediately if not available from observable
           const currentUser = this.authService.getUser();
           if (currentUser && currentUser.id) {
             this.userId = currentUser.id;
@@ -401,7 +400,6 @@ export class MyListingsComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(userSubscription);
 
-    // If userId is already provided via @Input, load listings
     if (this.userId) {
       this.loadUserListings();
     }
@@ -419,8 +417,6 @@ export class MyListingsComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.errorMessage = '';
-
-    // Add authorization header with token
     const token = this.authService.getToken();
     const headers: any = {};
 
@@ -523,7 +519,6 @@ export class MyListingsComponent implements OnInit, OnDestroy {
   // Event handlers for actions
   onViewListing(listing: Listing): void {
     this.activeDropdown = null;
-    // Navigate to item details page
     this.router.navigate(['/item-detail', listing.id], {
       queryParams: { from: 'my-listings' },
     });

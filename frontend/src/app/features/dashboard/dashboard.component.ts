@@ -11,7 +11,7 @@ import {
   Message,
   Notification,
 } from '../../shared/services/data.service';
-import { AuthService } from '../../features/auth/auth.service'; // Add this import
+import { AuthService } from '../../features/auth/auth.service';
 
 import { ProfileSidebarComponent } from '../../shared/components/profile-sidebar/profile-sidebar.component';
 import { NotificationSidebarComponent } from '../../shared/components/notification-sidebar/notification-sidebar.component';
@@ -119,7 +119,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   activeTab: string = 'my-listings';
   isLoading: boolean = false;
   errorMessage: string = '';
-  currentUserId: string | null = null; // Add this property
+  currentUserId: string | null = null;
   private subscriptions: Subscription = new Subscription();
 
   myListings: Listing[] = [];
@@ -128,7 +128,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private dataService: DataService,
-    private authService: AuthService // Inject AuthService
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {

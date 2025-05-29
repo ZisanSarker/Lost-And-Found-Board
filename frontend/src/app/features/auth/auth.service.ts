@@ -70,7 +70,6 @@ export class AuthService {
           this.logout();
         }
       } else {
-        // Clear any partial data
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
         this.userSubject.next(null);

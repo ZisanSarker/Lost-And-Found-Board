@@ -31,29 +31,23 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: 'Invalid email address' });
   }
 
-  if (
-    (!validator.isStrongPassword(password),
-    {
-      minLength: 8,
-      minLowercase: 1,
-      minUppercase: 1,
-      minNumbers: 1,
-      minSymbols: 1,
-    })
-  ) {
-    return res
-      .status(400)
-      .json({
-        message:
-          'Password must be at least 8 characters, include a number and special character',
-      });
+  // Match the exact regex used in the frontend
+  const strongPasswordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
+
+  if (!strongPasswordRegex.test(password)) {
+    return res.status(400).json({
+      message:
+        'Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character.',
+    });
   }
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser){
+    if (existingUser) {
       return res.status(400).json({ message: 'Email already exists' });
     }
+
     const newUser = await User.create({ username, email, password });
 
     const { accessToken, refreshToken } = generateTokens(newUser._id);
@@ -62,11 +56,8 @@ exports.register = async (req, res) => {
     const refreshTime = 30 * 24 * 60 * 60 * 1000;
 
     res.cookie('accessToken', accessToken, cookieOptions(accessTime));
-    res.cookie(
-      'refreshToken',
-      refreshToken,
-      cookieOptions(refreshTime)
-    );
+    res.cookie('refreshToken', refreshToken, cookieOptions(refreshTime));
+
     res.status(201).json({
       message: 'Registered successfully',
       user: sanitizeUser(newUser),
@@ -78,6 +69,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ message: 'Server error during registration' });
   }
 };
+
 
 // ─────────── Login ───────────
 exports.login = async (req, res) => {
