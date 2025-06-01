@@ -60,11 +60,7 @@ app.use('/api/item', itemRoutes);
 app.use('/api/email', require('./routes/email.routes'));
 
 app.get('/', (req, res) => {
-  res.send(`
-    <a href="/api/auth/github">Login with GitHub</a>
-    <a href="/api/auth/google">Login with Google</a>
-    <a href="/api/auth/facebook">Login with Facebook</a>
-  `);
+  res.send("Hello Beautiful People! 👋");
 });
 
 
