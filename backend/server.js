@@ -56,7 +56,7 @@ app.use(
 // ───────────── Routes ─────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', authMiddleware , profileRoutes);
-app.use('/api/item', itemRoutes);
+app.use('/api/item', authMiddleware, itemRoutes);
 app.use('/api/email', require('./routes/email.routes'));
 
 app.get('/', (req, res) => {

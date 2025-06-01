@@ -1,11 +1,12 @@
 // all-posts.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 import { ItemGridComponent } from '../item-grid/item-grid.component';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../features/auth/auth.service'; 
 const baseUrl = environment.apiBaseUrl;
 
 interface Item {
@@ -133,7 +134,8 @@ export class AllPostsComponent implements OnInit {
   lostItems: Item[] = [];
   foundItems: Item[] = [];
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
   ngOnInit() {
     this.loadData();
@@ -153,13 +155,25 @@ export class AllPostsComponent implements OnInit {
     }
   }
 
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+  }
+
   loadData() {
     this.error = '';
     this.isLoading = true;
     
     forkJoin({
-      lost: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/lost`),
-      found: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/found`)
+      lost: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/lost`, {
+        headers: this.getAuthHeaders(),
+      }),
+      found: this.http.get<ApiResponse>(`${baseUrl}/api/item/type/found`, {
+        headers: this.getAuthHeaders(),
+      })
     }).subscribe({
       next: (responses) => {
         if (responses.lost.success) {
@@ -188,7 +202,9 @@ export class AllPostsComponent implements OnInit {
     this.isLoading = true;
     this.error = '';
 
-    this.http.get<ApiResponse>(`${baseUrl}/api/item/type/${type}`)
+    this.http.get<ApiResponse>(`${baseUrl}/api/item/type/${type}`, {
+        headers: this.getAuthHeaders(),
+      })
       .subscribe({
         next: (response) => {
           if (response.success) {
