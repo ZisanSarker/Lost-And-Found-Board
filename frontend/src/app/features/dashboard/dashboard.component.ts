@@ -15,7 +15,7 @@ import { AuthService } from '../../core/services/auth.service';
 
 import { ProfileSidebarComponent } from '../../shared/components/profile-sidebar/profile-sidebar.component';
 import { NotificationSidebarComponent } from '../../shared/components/notification-sidebar/notification-sidebar.component';
-import { MyListingsComponent } from '../../shared/components/my-listings/my-listings.component';
+import { MyListingsComponent } from '../my-listings/my-listings.component';
 import { DashboardHeaderComponent } from '../../shared/components/dashboard-header/dashboard-header.component';
 
 @Component({
