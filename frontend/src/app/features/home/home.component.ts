@@ -4,7 +4,7 @@ import { HeroComponent } from "../../shared/components/hero/hero.component";
 import { AllPostsComponent } from "../../shared/components/all-posts/all-posts.component";
 import { HowItWorksComponent } from "../../shared/components/how-it-work/how-it-work.component";
 import { CtaSectionComponent } from '../../shared/components/cta-section/cta-section.component';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { NgIf } from '@angular/common';
 
 @Component({

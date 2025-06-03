@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
-import { AuthGuard } from './features/auth/auth.guard';
-import { UnAuthGuard } from './features/auth/unauth.guard';
+import { AuthGuard } from './core/guards/auth.guard';
+import { UnAuthGuard } from './core/guards/unauth.guard';
 
 export const routes: Routes = [
   // Auth routes outside Layout (no AuthGuard needed here)

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { AuthService } from '../../../features/auth/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 const baseUrl = environment.apiBaseUrl;
 

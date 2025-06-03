@@ -6,7 +6,7 @@ import { forkJoin } from 'rxjs';
 import { ItemGridComponent } from '../item-grid/item-grid.component';
 import { SearchBarComponent } from '../search-bar/search-bar.component';
 import { environment } from '../../../../environments/environment';
-import { AuthService } from '../../../features/auth/auth.service'; 
+import { AuthService } from '../../../core/services/auth.service'; 
 const baseUrl = environment.apiBaseUrl;
 
 interface Item {

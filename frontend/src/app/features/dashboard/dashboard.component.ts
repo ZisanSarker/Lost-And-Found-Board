@@ -11,7 +11,7 @@ import {
   Message,
   Notification,
 } from '../../shared/services/data.service';
-import { AuthService } from '../../features/auth/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 import { ProfileSidebarComponent } from '../../shared/components/profile-sidebar/profile-sidebar.component';
 import { NotificationSidebarComponent } from '../../shared/components/notification-sidebar/notification-sidebar.component';

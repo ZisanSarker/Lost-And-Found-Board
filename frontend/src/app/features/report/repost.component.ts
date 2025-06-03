@@ -10,7 +10,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CloudinaryService, CloudinaryResponse } from './cloudinary.service';
 import { firstValueFrom } from 'rxjs';
 

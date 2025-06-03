@@ -6,24 +6,30 @@ import {
   AbstractControl,
   ValidationErrors,
   ReactiveFormsModule,
+  FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { FormInputComponent } from '../../../shared/components/form-input/form-input.component'; // import FormInputComponent
 
 const baseUrl = environment.apiBaseUrl;
 
 @Component({
   selector: 'app-sign-up',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    RouterModule,
+    FormInputComponent,
+  ],
   template: `
-    <div
-      class="min-h-screen flex items-center justify-center bg-orange-50 px-4"
-    >
+    <div class="min-h-screen flex items-center justify-center bg-orange-50 px-4">
       <form
         [formGroup]="form"
         (ngSubmit)="onSubmit()"
@@ -31,117 +37,40 @@ const baseUrl = environment.apiBaseUrl;
       >
         <h2 class="text-3xl font-bold text-center text-orange-600">Sign Up</h2>
 
-        <!-- Full Name -->
-        <div>
-          <label
-            for="username"
-            class="block text-sm font-semibold text-orange-800 mb-1"
-          >
-            Full Name
-          </label>
-          <input
-            id="username"
-            type="text"
-            formControlName="username"
-            class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="Zisan Sarker"
-          />
-          <p
-            *ngIf="username?.touched && username?.invalid"
-            class="text-sm text-red-600 mt-1"
-          >
-            Full name is required and must contain only letters.
-          </p>
-        </div>
+        <app-form-input
+          label="Full Name"
+          [control]="username"
+          type="text"
+          placeholder="Zisan Sarker"
+          errorMessage="Full name is required and must contain only letters."
+        ></app-form-input>
 
-        <!-- Email -->
-        <div>
-          <label
-            for="email"
-            class="block text-sm font-semibold text-orange-800 mb-1"
-          >
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="you@example.com"
-          />
-          <p
-            *ngIf="email?.invalid && email?.touched"
-            class="text-sm text-red-600 mt-1"
-          >
-            A valid email is required.
-          </p>
-        </div>
+        <app-form-input
+          label="Email"
+          [control]="email"
+          type="email"
+          placeholder="you@example.com"
+          errorMessage="A valid email is required."
+        ></app-form-input>
 
-        <!-- Password -->
-        <div>
-          <label
-            for="password"
-            class="block text-sm font-semibold text-orange-800 mb-1"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="••••••••"
-          />
-          <p
-            *ngIf="password?.touched && password?.errors?.['required']"
-            class="text-sm text-red-600 mt-1"
-          >
-            Password is required.
-          </p>
-          <p
-            *ngIf="password?.touched && password?.errors?.['minlength']"
-            class="text-sm text-red-600 mt-1"
-          >
-            Password must be at least 8 characters long.
-          </p>
-          <p
-            *ngIf="password?.touched && password?.errors?.['pattern']"
-            class="text-sm text-red-600 mt-1"
-          >
-            Must include uppercase, lowercase, number, and special character.
-          </p>
-        </div>
+        <app-form-input
+          label="Password"
+          [control]="password"
+          type="password"
+          placeholder="••••••••"
+          errorMessage="
+            Password must be at least 8 characters, include uppercase, lowercase, number, and special character.
+          "
+        ></app-form-input>
 
-        <!-- Confirm Password -->
-        <div>
-          <label
-            for="confirmPassword"
-            class="block text-sm font-semibold text-orange-800 mb-1"
-          >
-            Confirm Password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            formControlName="confirmPassword"
-            class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="••••••••"
-          />
-          <p
-            *ngIf="confirmPassword?.touched && confirmPassword?.invalid"
-            class="text-sm text-red-600 mt-1"
-          >
-            Confirm password is required.
-          </p>
-          <p
-            *ngIf="form.errors?.['passwordsMismatch'] && confirmPassword?.touched"
-            class="text-sm text-red-600 mt-1"
-          >
-            Passwords do not match.
-          </p>
-        </div>
+        <app-form-input
+          label="Confirm Password"
+          [control]="confirmPassword"
+          type="password"
+          placeholder="••••••••"
+          errorMessage="Passwords do not match."
+        ></app-form-input>
 
-        <!-- Submit Button -->
         <button
           type="submit"
           [disabled]="form.invalid || isLoading"
@@ -150,7 +79,6 @@ const baseUrl = environment.apiBaseUrl;
           {{ isLoading ? 'Creating Account...' : 'Sign Up' }}
         </button>
 
-        <!-- Sign In Link -->
         <div class="text-center">
           <p class="text-gray-600">
             Already have an account?
@@ -203,7 +131,6 @@ export class SignUpComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Redirect if already logged in
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/home']);
     }
@@ -253,18 +180,18 @@ export class SignUpComponent implements OnInit {
   }
 
   get username() {
-    return this.form.get('username');
+    return this.form.get('username')! as FormControl;
   }
 
   get email() {
-    return this.form.get('email');
+    return this.form.get('email')! as FormControl;
   }
 
   get password() {
-    return this.form.get('password');
+    return this.form.get('password')! as FormControl;
   }
 
   get confirmPassword() {
-    return this.form.get('confirmPassword');
+    return this.form.get('confirmPassword')! as FormControl;
   }
 }

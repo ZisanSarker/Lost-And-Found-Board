@@ -5,7 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AuthService } from '../../../features/auth/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface Listing {
   id: string;

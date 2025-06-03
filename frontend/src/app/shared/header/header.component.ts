@@ -2,7 +2,7 @@ import { Component, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
-import { AuthService } from '../../features/auth/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Observable } from 'rxjs';
 
 @Component({

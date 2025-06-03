@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../../features/auth/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface Item {
   id: string;

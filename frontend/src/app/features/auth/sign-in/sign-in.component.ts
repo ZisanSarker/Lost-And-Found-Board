@@ -1,23 +1,31 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FormBuilder,
-  Validators,
   FormGroup,
+  Validators,
   ReactiveFormsModule,
+  FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../../environments/environment';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { FormInputComponent } from '../../../shared/components/form-input/form-input.component'; // Update path as needed
 
 const baseUrl = environment.apiBaseUrl;
 
 @Component({
   selector: 'app-sign-in',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, RouterModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    RouterModule,
+    FormInputComponent,
+  ],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-orange-50 px-4">
       <form
@@ -26,42 +34,23 @@ const baseUrl = environment.apiBaseUrl;
         class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl space-y-6"
       >
         <h2 class="text-3xl font-bold text-center text-orange-600">Sign In</h2>
-        
-        <!-- Email -->
-        <div>
-          <label for="email" class="block text-sm font-semibold text-orange-800 mb-1">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            formControlName="email"
-            class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="you@example.com"
-          />
-          <p *ngIf="email?.invalid && email?.touched" class="text-sm text-red-600 mt-1">
-            A valid email is required.
-          </p>
-        </div>
-        
-        <!-- Password -->
-        <div>
-          <label for="password" class="block text-sm font-semibold text-orange-800 mb-1">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            class="w-full px-4 py-2 border border-orange-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            placeholder="••••••••"
-          />
-          <p *ngIf="password?.touched && password?.errors?.['required']" class="text-sm text-red-600 mt-1">
-            Password is required.
-          </p>
-        </div>
-        
-        <!-- Submit Button -->
+
+        <app-form-input
+          label="Email"
+          [control]="email"
+          type="email"
+          placeholder="you@example.com"
+          errorMessage="A valid email is required."
+        />
+
+        <app-form-input
+          label="Password"
+          [control]="password"
+          type="password"
+          placeholder="••••••••"
+          errorMessage="Password is required."
+        />
+
         <button
           type="submit"
           [disabled]="form.invalid || isLoading"
@@ -69,11 +58,14 @@ const baseUrl = environment.apiBaseUrl;
         >
           {{ isLoading ? 'Signing In...' : 'Sign In' }}
         </button>
-        
-        <!-- Sign Up Link -->
+
         <div class="text-center">
-          <p class="text-gray-600">Don't have an account? 
-            <a routerLink="/auth/sign-up" class="text-orange-600 hover:text-orange-700 font-semibold">
+          <p class="text-gray-600">
+            Don't have an account?
+            <a
+              routerLink="/auth/sign-up"
+              class="text-orange-600 hover:text-orange-700 font-semibold"
+            >
               Sign Up
             </a>
           </p>
@@ -85,7 +77,7 @@ const baseUrl = environment.apiBaseUrl;
 export class SignInComponent implements OnInit {
   form: FormGroup;
   isLoading = false;
-  
+
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -100,7 +92,6 @@ export class SignInComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Redirect if already logged in
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/home']);
     }
@@ -110,7 +101,7 @@ export class SignInComponent implements OnInit {
     if (this.form.invalid || this.isLoading) return;
 
     this.isLoading = true;
-    
+
     this.http
       .post<{ accessToken: string; user: any }>(
         `${baseUrl}/api/auth/login`,
@@ -122,6 +113,7 @@ export class SignInComponent implements OnInit {
           if (res.accessToken && res.user) {
             this.authService.login(res.accessToken, res.user);
             this.toast.success('Sign-in successful!');
+            this.router.navigate(['/home']);
           } else {
             this.toast.error('Invalid response from server.');
           }
@@ -137,10 +129,10 @@ export class SignInComponent implements OnInit {
   }
 
   get email() {
-    return this.form.get('email');
+    return this.form.get('email') as FormControl;
   }
 
   get password() {
-    return this.form.get('password');
+    return this.form.get('password') as FormControl;
   }
 }
