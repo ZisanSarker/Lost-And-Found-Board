@@ -1,4 +1,4 @@
-import { Listing, ListingFilter } from '../../../shared/models/listing.model';
+import { Listing, ListingFilter } from '../models/listing.model';
 
 export class ListingUtils {
   static filterListings(listings: Listing[], filter: ListingFilter, searchQuery: string = ''): Listing[] {

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Listing, ListingResponse, ListingActionResponse } from '../../shared/models/listing.model';
+import { Listing, ListingResponse, ListingActionResponse } from '../../features/my-listings/models/listing.model';
 import { AuthService } from './auth.service';
 
 @Injectable({

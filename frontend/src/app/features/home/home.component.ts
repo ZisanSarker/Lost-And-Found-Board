@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { HeroComponent } from "../../shared/components/hero/hero.component";
-import { AllPostsComponent } from "../../shared/components/all-posts/all-posts.component";
-import { HowItWorksComponent } from "../../shared/components/how-it-work/how-it-work.component";
-import { CtaSectionComponent } from '../../shared/components/cta-section/cta-section.component';
+import { HeroComponent } from "./components/hero/hero.component";
+import { AllPostsComponent } from "./components/all-posts/all-posts.component";
+import { HowItWorksComponent } from "./components/how-it-work/how-it-work.component";
+import { CtaSectionComponent } from './components/cta-section/cta-section.component';
 import { AuthService } from '../../core/services/auth.service';
 import { NgIf } from '@angular/common';
 

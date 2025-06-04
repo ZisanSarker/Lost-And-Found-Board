@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ListingService } from '../../core/services/listing.service';
-import { Listing, ListingFilter } from '../../shared/models/listing.model';
+import { Listing, ListingFilter } from './models/listing.model';
 import { ListingUtils } from './utils/listing.utils';
 import { ListingFilterComponent } from './components/listing-filter/listing-filter.component';
 import { ListingCardComponent } from './components/listing-card/listing-card.component';

@@ -59,7 +59,7 @@ export const routes: Routes = [
         path: 'items',
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import('./shared/components/all-posts/all-posts.component').then(
+          import('./features/home/components/all-posts/all-posts.component').then(
             (m) => m.AllPostsComponent
           ),
       },

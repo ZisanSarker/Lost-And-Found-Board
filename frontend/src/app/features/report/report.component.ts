@@ -498,7 +498,7 @@ export class ReportPageComponent implements OnInit {
       );
 
       const response = await firstValueFrom(
-        this.itemService.submitItem(data)
+        this.itemService.submitItem(data as any)
       );
 
       this.toastr.clear();

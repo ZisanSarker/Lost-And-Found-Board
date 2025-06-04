@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FilterTab, ListingFilter } from '../../../../shared/models/listing.model';
+import { FilterTab, ListingFilter } from '../../models/listing.model';
 
 @Component({
   selector: 'app-listing-filter',

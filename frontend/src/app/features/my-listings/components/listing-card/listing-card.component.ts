@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Listing } from '../../../../shared/models/listing.model';
+import { Listing } from '../../models/listing.model';
 
 @Component({
   selector: 'app-listing-card',
