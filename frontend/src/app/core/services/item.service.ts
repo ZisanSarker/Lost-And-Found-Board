@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ItemFormData, ApiResponse } from '../../shared/models/item.model';
+import { ItemFormData, ApiResponse } from '../../features/report/models/item.model';
 import { AuthService } from './auth.service';
 
 @Injectable({

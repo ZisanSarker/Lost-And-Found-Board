@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CloudinaryService } from '../../../core/services/cloudinary.service';
+import { CloudinaryService } from '../../../../core/services/cloudinary.service';
 import { ToastrService } from 'ngx-toastr';
-import { ImageFile } from '../../../shared/models/item.model';
+import { ImageFile } from '../../models/item.model';
 import { firstValueFrom } from 'rxjs';
 
 @Component({

@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { UserProfile, ApiResponse } from '../../shared/models/user-profile.model';
+import { UserProfile, ApiResponse } from '../../features/profile/models/user-profile.model';
 import { AuthService } from './auth.service';
 
 @Injectable({

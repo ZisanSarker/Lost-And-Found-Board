@@ -7,9 +7,9 @@ import { AuthService } from '../../core/services/auth.service';
 import { ItemService } from '../../core/services/item.service';
 import { CloudinaryService } from '../../core/services/cloudinary.service';
 import { UiTextService } from '../../core/services/ui-text.service';
-import { ImageUploadComponent } from './image-upload/image-upload.component';
-import { ItemFormData, ItemType, ImageFile, ApiResponse } from '../../shared/models/item.model';
-import { contactInfoValidator } from '../../shared/utils/validators';
+import { ImageUploadComponent } from './components/image-upload/image-upload.component';
+import { ItemFormData, ItemType, ImageFile, ApiResponse } from './models/item.model';
+import { contactInfoValidator } from './utils/validators';
 import { firstValueFrom } from 'rxjs';
 
 @Component({

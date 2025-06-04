@@ -1,8 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserProfile } from '../../../shared/models/user-profile.model';
-import { formatDate } from '../../../shared/utils/date-formatter.util';
+import { UserProfile } from '../../models/user-profile.model';
+import { formatDate } from '../../utils/date-formatter.util';
 
 @Component({
   selector: 'app-profile-header',

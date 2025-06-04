@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserProfile } from '../../../shared/models/user-profile.model';
+import { UserProfile } from '../../models/user-profile.model';
 
 @Component({
   selector: 'app-bio',
