@@ -38,20 +38,18 @@ import { DashboardHeaderComponent } from '../../shared/components/dashboard-head
         <app-dashboard-header
           (reportLostItem)="onReportLostItem()"
           (reportFoundItem)="onReportFoundItem()"
-        >
-        </app-dashboard-header>
+        />
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <!-- Sidebar -->
           <div class="lg:col-span-1">
-            <app-profile-sidebar></app-profile-sidebar>
+            <app-profile-sidebar/>
             <app-notification-sidebar
               [activeTab]="activeTab"
               [unreadMessagesCount]="getUnreadMessagesCount()"
               [unreadNotificationsCount]="getUnreadNotificationsCount()"
               (tabChange)="setActiveTab($event)"
-            >
-            </app-notification-sidebar>
+            />
           </div>
 
           <!-- Main Content -->
