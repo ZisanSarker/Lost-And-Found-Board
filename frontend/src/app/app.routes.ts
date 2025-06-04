@@ -89,8 +89,8 @@ export const routes: Routes = [
         path: 'repost/:type',
         canActivate: [AuthGuard],
         loadComponent: () =>
-          import('./features/report/repost.component').then(
-            (m) => m.RepostPageComponent
+          import('./features/report/report.component').then(
+            (m) => m.ReportPageComponent
           ),
       },
       {

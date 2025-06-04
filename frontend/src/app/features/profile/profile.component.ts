@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { UserProfile } from '../../shared/models/user-profile.model';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
-import { CloudinaryService } from '../report/cloudinary.service';
+import { CloudinaryService } from '../../core/services/cloudinary.service';
 import { ProfileHeaderComponent } from './profile-header/profile-header.component';
 import { ContactInfoComponent } from './contact-info/contact-info.component';
 import { BioComponent } from './bio/bio.component';
